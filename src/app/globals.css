@@ -1,26 +1,27 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer utilities {
+  .pattern-overlay {
+    background-image: repeating-linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.1),
+      rgba(255, 255, 255, 0.1) 5px,
+      transparent 5px,
+      transparent 10px
+    );
+    mask-image: linear-gradient(to left, transparent, black 30%);
+    -webkit-mask-image: linear-gradient(to left, transparent, black 30%);
+    opacity: 0.7;
+    backdrop-filter: blur(1px);
+    animation: patternShift 30s linear infinite;
   }
-}
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  @keyframes patternShift {
+    0% {
+      background-position: 0 0;
+    }
+    100% {
+      background-position: 100px 100px;
+    }
+  }
 }
