@@ -26,27 +26,75 @@ export interface SystemMetrics {
   uptime: number;
 }
 
+export interface ClinicalIndicators {
+  phq9Score?: number;
+  symptomClusters?: string[];
+  riskFactors?: string[];
+  protectiveFactors?: string[];
+}
+
+export interface LinguisticPatterns {
+  firstPersonCount: number;
+  negationCount: number;
+  depressionKeywords: string[];
+  positiveKeywords: string[];
+  sentenceComplexity?: string;
+  emotionalIntensity?: string;
+}
+
+export interface TherapeuticRecommendations {
+  primaryApproach?: string;
+  interventions?: string[];
+  urgency?: "low" | "medium" | "high";
+}
+
 export interface AnalysisResult {
   sentiment: "positive" | "neutral" | "concerning" | "negative";
   riskLevel: "low" | "medium" | "high";
   confidence: number;
   score: number;
   keywords: string[];
-  linguisticPatterns: {
-    firstPersonCount: number;
-    negationCount: number;
-    depressionKeywords: string[];
-    positiveKeywords: string[];
-  };
+  clinicalIndicators?: ClinicalIndicators;
+  linguisticPatterns: LinguisticPatterns;
+  therapeuticRecommendations?: TherapeuticRecommendations;
+}
+
+export interface RiskAssessment {
+  level: "low" | "medium" | "high";
+  reasoning: string;
+  confidence: number;
+  safetyPlan?: string[];
 }
 
 export interface AIResponse {
   content: string;
+  therapeuticTechniques?: string[];
   supportiveElements: string[];
   recommendedActions: string[];
-  riskAssessment: {
-    level: "low" | "medium" | "high";
-    reasoning: string;
-    confidence: number;
-  };
+  copingStrategies?: string[];
+  riskAssessment: RiskAssessment;
+  followUpSuggestions?: string[];
+  resourceRecommendations?: string[];
+}
+
+export interface LinguisticAnalysisResult {
+  firstPersonCount: number;
+  negationCount: number;
+  intensifierCount: number;
+  sentenceComplexity: string;
+  emotionalIntensity: string;
+  wordCount: number;
+  sentenceCount: number;
+}
+
+export interface KeywordAnalysisResult {
+  depressionKeywords: string[];
+  positiveKeywords: string[];
+  riskKeywords: string[];
+}
+
+export interface ConversationalContext {
+  consistentNegativeThemes: boolean;
+  escalatingConcerns: boolean;
+  conversationLength: number;
 }

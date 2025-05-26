@@ -1,6 +1,12 @@
 import { generateText } from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { AnalysisResult, AIResponse } from "./types";
+import {
+  AnalysisResult,
+  AIResponse,
+  LinguisticAnalysisResult,
+  KeywordAnalysisResult,
+  ConversationalContext,
+} from "./types";
 
 const google = createGoogleGenerativeAI({
   apiKey:
@@ -11,52 +17,238 @@ const google = createGoogleGenerativeAI({
 export class AIService {
   private model = google("models/gemini-2.0-flash-exp");
 
+  private readonly depressionIndicators = {
+    cognitive: [
+      "worthless",
+      "hopeless",
+      "helpless",
+      "useless",
+      "failure",
+      "burden",
+      "nothing matters",
+      "pointless",
+      "meaningless",
+      "empty",
+      "numb",
+      "can't think",
+      "confused",
+      "forgetful",
+      "indecisive",
+      "overwhelmed",
+    ],
+    emotional: [
+      "sad",
+      "depressed",
+      "down",
+      "blue",
+      "miserable",
+      "devastated",
+      "heartbroken",
+      "lonely",
+      "isolated",
+      "abandoned",
+      "rejected",
+      "angry",
+      "irritated",
+      "frustrated",
+      "anxious",
+      "worried",
+      "scared",
+    ],
+    behavioral: [
+      "can't sleep",
+      "insomnia",
+      "sleeping too much",
+      "tired",
+      "exhausted",
+      "no energy",
+      "can't eat",
+      "overeating",
+      "withdrawn",
+      "avoiding",
+      "procrastinating",
+      "can't concentrate",
+      "restless",
+      "agitated",
+    ],
+    somatic: [
+      "headache",
+      "stomach ache",
+      "chest pain",
+      "muscle tension",
+      "fatigue",
+      "weakness",
+      "dizzy",
+      "nauseous",
+      "appetite loss",
+      "weight loss",
+      "weight gain",
+      "aches",
+      "pains",
+    ],
+    suicidal: [
+      "want to die",
+      "kill myself",
+      "end it all",
+      "not worth living",
+      "better off dead",
+      "suicide",
+      "self-harm",
+      "hurt myself",
+      "disappear",
+      "give up",
+      "can't go on",
+      "no point",
+    ],
+  };
+
+  private readonly positiveIndicators = [
+    "happy",
+    "joy",
+    "excited",
+    "grateful",
+    "thankful",
+    "blessed",
+    "hopeful",
+    "optimistic",
+    "confident",
+    "proud",
+    "accomplished",
+    "loved",
+    "supported",
+    "connected",
+    "peaceful",
+    "calm",
+    "relaxed",
+    "motivated",
+    "energetic",
+    "focused",
+    "clear",
+    "determined",
+  ];
+
+  private readonly therapeuticApproaches = {
+    low: {
+      techniques: [
+        "active_listening",
+        "validation",
+        "psychoeducation",
+        "behavioral_activation",
+      ],
+      interventions: [
+        "mood_tracking",
+        "activity_scheduling",
+        "social_connection",
+      ],
+    },
+    medium: {
+      techniques: [
+        "cognitive_restructuring",
+        "problem_solving",
+        "coping_skills",
+        "mindfulness",
+      ],
+      interventions: [
+        "professional_referral",
+        "safety_planning",
+        "support_system_activation",
+      ],
+    },
+    high: {
+      techniques: [
+        "crisis_intervention",
+        "safety_assessment",
+        "immediate_support",
+      ],
+      interventions: [
+        "emergency_resources",
+        "professional_intervention",
+        "continuous_monitoring",
+      ],
+    },
+  };
+
   async analyzeUserInput(
     text: string,
     conversationHistory: string[] = [],
   ): Promise<AnalysisResult> {
-    const analysisPrompt = `
-You are an expert clinical psychologist specializing in depression detection through conversational analysis. 
+    const linguisticAnalysis = this.performLinguisticAnalysis(text);
+    const keywordAnalysis = this.performKeywordAnalysis(text);
+    // Contextual analysis for future enhancement
+    // const contextualAnalysis = this.analyzeConversationalContext(text, conversationHistory);
 
-Analyze the following user message for signs of depression, considering:
-1. Linguistic patterns (first-person pronouns, negation patterns)
-2. Depression-related keywords and phrases
-3. Emotional tone and sentiment
-4. Risk indicators based on clinical research
+    const analysisPrompt = `
+You are an expert clinical psychologist specializing in depression detection through conversational analysis based on validated research methodologies.
+
+Analyze the following user message using evidence-based clinical indicators:
 
 User message: "${text}"
+Conversation context: ${conversationHistory.slice(-5).join(" | ")}
 
-Previous conversation context: ${conversationHistory.slice(-3).join(" | ")}
+Linguistic patterns detected:
+- First-person pronouns: ${linguisticAnalysis.firstPersonCount}
+- Negation patterns: ${linguisticAnalysis.negationCount}
+- Sentence complexity: ${linguisticAnalysis.sentenceComplexity}
+- Emotional intensity: ${linguisticAnalysis.emotionalIntensity}
+
+Keyword analysis:
+- Depression indicators: ${keywordAnalysis.depressionKeywords.length}
+- Positive indicators: ${keywordAnalysis.positiveKeywords.length}
+- Risk keywords: ${keywordAnalysis.riskKeywords.length}
+
+Clinical assessment criteria:
+1. PHQ-9 symptom indicators (mood, anhedonia, sleep, energy, appetite, concentration, psychomotor, guilt, suicidal ideation)
+2. Beck Depression Inventory markers
+3. Linguistic depression markers from research literature
+4. Contextual risk factors and protective factors
 
 Provide analysis in this exact JSON format:
 {
   "sentiment": "positive|neutral|concerning|negative",
   "riskLevel": "low|medium|high",
   "confidence": 0.0-1.0,
-  "score": numeric_score,
+  "score": numeric_score_0_to_100,
   "keywords": ["detected", "keywords"],
+  "clinicalIndicators": {
+    "phq9Score": estimated_score_0_to_27,
+    "symptomClusters": ["cognitive", "emotional", "behavioral", "somatic"],
+    "riskFactors": ["identified", "risk", "factors"],
+    "protectiveFactors": ["identified", "protective", "factors"]
+  },
   "linguisticPatterns": {
-    "firstPersonCount": number,
-    "negationCount": number,
-    "depressionKeywords": ["keyword1", "keyword2"],
-    "positiveKeywords": ["keyword1", "keyword2"]
+    "firstPersonCount": ${linguisticAnalysis.firstPersonCount},
+    "negationCount": ${linguisticAnalysis.negationCount},
+    "depressionKeywords": ${JSON.stringify(keywordAnalysis.depressionKeywords)},
+    "positiveKeywords": ${JSON.stringify(keywordAnalysis.positiveKeywords)},
+    "sentenceComplexity": "${linguisticAnalysis.sentenceComplexity}",
+    "emotionalIntensity": "${linguisticAnalysis.emotionalIntensity}"
+  },
+  "therapeuticRecommendations": {
+    "primaryApproach": "recommended_therapeutic_approach",
+    "interventions": ["intervention1", "intervention2"],
+    "urgency": "low|medium|high"
   }
 }
 
-Base your analysis on validated depression detection research and clinical indicators.
+Base your analysis on validated depression detection research, clinical assessment tools, and evidence-based practices.
 `;
 
     try {
       const { text: response } = await generateText({
         model: this.model,
         prompt: analysisPrompt,
-        temperature: 0.3,
+        temperature: 0.2,
+        maxTokens: 1000,
       });
 
-      return this.parseAnalysisResponse(response);
+      return this.parseEnhancedAnalysisResponse(
+        response,
+        linguisticAnalysis,
+        keywordAnalysis,
+      );
     } catch (error) {
       console.error("AI Analysis Error:", error);
-      return this.getFallbackAnalysis(text);
+      return this.getEnhancedFallbackAnalysis(text);
     }
   }
 
@@ -65,57 +257,214 @@ Base your analysis on validated depression detection research and clinical indic
     analysisResult: AnalysisResult,
     conversationHistory: string[] = [],
   ): Promise<AIResponse> {
+    const therapeuticContext =
+      this.therapeuticApproaches[analysisResult.riskLevel];
+
     const responsePrompt = `
 You are a compassionate AI mental health assistant trained in evidence-based therapeutic approaches including:
 - Cognitive Behavioral Therapy (CBT)
-- Behavioral Activation Therapy
-- Supportive counseling techniques
+- Behavioral Activation Therapy (BAT)
+- Dialectical Behavior Therapy (DBT) skills
+- Motivational Interviewing (MI)
 - Crisis intervention protocols
+- Trauma-informed care principles
 
 User message: "${userMessage}"
 Risk level: ${analysisResult.riskLevel}
 Sentiment: ${analysisResult.sentiment}
 Confidence: ${analysisResult.confidence}
+Clinical indicators: ${JSON.stringify(analysisResult.clinicalIndicators || {})}
 
-Recent conversation: ${conversationHistory.slice(-3).join(" | ")}
+Conversation history: ${conversationHistory.slice(-3).join(" | ")}
+
+Recommended therapeutic techniques: ${therapeuticContext.techniques.join(", ")}
+Suggested interventions: ${therapeuticContext.interventions.join(", ")}
 
 Generate a therapeutic response that:
-1. Validates the user's feelings
-2. Provides appropriate support based on risk level
-3. Uses evidence-based therapeutic techniques
-4. Maintains professional boundaries
-5. Includes crisis intervention if high risk detected
+1. Validates the user's emotional experience using reflective listening
+2. Applies appropriate evidence-based therapeutic techniques
+3. Provides psychoeducation when relevant
+4. Includes behavioral activation strategies for depression
+5. Maintains therapeutic alliance and rapport
+6. Addresses safety concerns if high risk detected
+7. Offers concrete coping strategies and resources
+
+Response guidelines by risk level:
+- Low risk: Supportive, educational, skill-building focus
+- Medium risk: More structured intervention, coping skills, professional resources
+- High risk: Crisis intervention, safety planning, immediate professional referral
 
 Respond in this exact JSON format:
 {
-  "content": "Your empathetic and therapeutic response here",
-  "supportiveElements": ["validation", "technique_used", "approach"],
-  "recommendedActions": ["action1", "action2"],
+  "content": "Your empathetic and therapeutically informed response here",
+  "therapeuticTechniques": ["technique1", "technique2"],
+  "supportiveElements": ["validation", "normalization", "hope_instillation"],
+  "recommendedActions": ["specific_action1", "specific_action2"],
+  "copingStrategies": ["strategy1", "strategy2"],
   "riskAssessment": {
-    "level": "low|medium|high",
-    "reasoning": "Clinical reasoning for assessment",
-    "confidence": 0.0-1.0
-  }
+    "level": "${analysisResult.riskLevel}",
+    "reasoning": "Clinical reasoning for assessment based on evidence",
+    "confidence": 0.0-1.0,
+    "safetyPlan": ["safety_step1", "safety_step2"]
+  },
+  "followUpSuggestions": ["suggestion1", "suggestion2"],
+  "resourceRecommendations": ["resource1", "resource2"]
 }
 
-Keep responses warm, professional, and therapeutically appropriate.
+Ensure responses are warm, professional, non-judgmental, and therapeutically appropriate while maintaining clear boundaries.
 `;
 
     try {
       const { text: response } = await generateText({
         model: this.model,
         prompt: responsePrompt,
-        temperature: 0.7,
+        temperature: 0.6,
+        maxTokens: 1200,
       });
 
-      return this.parseResponseData(response);
+      return this.parseEnhancedResponseData(response, analysisResult.riskLevel);
     } catch (error) {
       console.error("AI Response Generation Error:", error);
-      return this.getFallbackResponse(analysisResult.riskLevel);
+      return this.getEnhancedFallbackResponse(analysisResult.riskLevel);
     }
   }
 
-  private parseAnalysisResponse(response: string): AnalysisResult {
+  private performLinguisticAnalysis(text: string): LinguisticAnalysisResult {
+    const words = text.toLowerCase().split(/\s+/);
+    const sentences = text.split(/[.!?]+/).filter((s) => s.trim().length > 0);
+
+    const firstPersonPronouns = ["i", "me", "my", "myself", "mine"];
+    const negationWords = [
+      "not",
+      "no",
+      "never",
+      "nothing",
+      "nobody",
+      "nowhere",
+      "neither",
+      "nor",
+      "can't",
+      "won't",
+      "don't",
+      "doesn't",
+      "didn't",
+      "isn't",
+      "aren't",
+      "wasn't",
+      "weren't",
+    ];
+    const intensifiers = [
+      "very",
+      "extremely",
+      "really",
+      "so",
+      "too",
+      "quite",
+      "absolutely",
+      "completely",
+      "totally",
+    ];
+
+    const firstPersonCount = words.filter((word) =>
+      firstPersonPronouns.includes(word.replace(/[^\w]/g, "")),
+    ).length;
+
+    const negationCount = words.filter((word) =>
+      negationWords.some((neg) => word.includes(neg)),
+    ).length;
+
+    const intensifierCount = words.filter((word) =>
+      intensifiers.includes(word.replace(/[^\w]/g, "")),
+    ).length;
+
+    const avgWordsPerSentence =
+      sentences.length > 0 ? words.length / sentences.length : 0;
+    const sentenceComplexity =
+      avgWordsPerSentence > 15
+        ? "complex"
+        : avgWordsPerSentence > 8
+          ? "moderate"
+          : "simple";
+
+    const emotionalIntensity =
+      intensifierCount > 2 ? "high" : intensifierCount > 0 ? "moderate" : "low";
+
+    return {
+      firstPersonCount,
+      negationCount,
+      intensifierCount,
+      sentenceComplexity,
+      emotionalIntensity,
+      wordCount: words.length,
+      sentenceCount: sentences.length,
+    };
+  }
+
+  private performKeywordAnalysis(text: string): KeywordAnalysisResult {
+    const lowerText = text.toLowerCase();
+
+    const depressionKeywords: string[] = [];
+    const positiveKeywords: string[] = [];
+    const riskKeywords: string[] = [];
+
+    // Check for depression indicators across categories
+    Object.entries(this.depressionIndicators).forEach(
+      ([category, keywords]) => {
+        keywords.forEach((keyword) => {
+          if (lowerText.includes(keyword)) {
+            depressionKeywords.push(keyword);
+            if (category === "suicidal") {
+              riskKeywords.push(keyword);
+            }
+          }
+        });
+      },
+    );
+
+    // Check for positive indicators
+    this.positiveIndicators.forEach((keyword) => {
+      if (lowerText.includes(keyword)) {
+        positiveKeywords.push(keyword);
+      }
+    });
+
+    return {
+      depressionKeywords: [...new Set(depressionKeywords)],
+      positiveKeywords: [...new Set(positiveKeywords)],
+      riskKeywords: [...new Set(riskKeywords)],
+    };
+  }
+
+  private analyzeConversationalContext(
+    text: string,
+    history: string[],
+  ): ConversationalContext {
+    const recentHistory = history.slice(-3).join(" ").toLowerCase();
+    const currentText = text.toLowerCase();
+
+    const consistentNegativeThemes = this.depressionIndicators.emotional.some(
+      (emotion) =>
+        recentHistory.includes(emotion) && currentText.includes(emotion),
+    );
+
+    const escalatingConcerns =
+      history.length > 0 &&
+      this.depressionIndicators.suicidal.some((risk) =>
+        currentText.includes(risk),
+      );
+
+    return {
+      consistentNegativeThemes,
+      escalatingConcerns,
+      conversationLength: history.length,
+    };
+  }
+
+  private parseEnhancedAnalysisResponse(
+    response: string,
+    linguisticAnalysis: LinguisticAnalysisResult,
+    keywordAnalysis: KeywordAnalysisResult,
+  ): AnalysisResult {
     try {
       const cleanResponse = response.replace(/```json\n?|\n?```/g, "").trim();
       const parsed = JSON.parse(cleanResponse);
@@ -126,6 +475,7 @@ Keep responses warm, professional, and therapeutically appropriate.
         confidence: Math.max(0, Math.min(1, parsed.confidence || 0.5)),
         score: parsed.score || 0,
         keywords: Array.isArray(parsed.keywords) ? parsed.keywords : [],
+        clinicalIndicators: parsed.clinicalIndicators || {},
         linguisticPatterns: {
           firstPersonCount: parsed.linguisticPatterns?.firstPersonCount || 0,
           negationCount: parsed.linguisticPatterns?.negationCount || 0,
@@ -139,15 +489,27 @@ Keep responses warm, professional, and therapeutically appropriate.
           )
             ? parsed.linguisticPatterns.positiveKeywords
             : [],
+          sentenceComplexity:
+            parsed.linguisticPatterns?.sentenceComplexity || "unknown",
+          emotionalIntensity:
+            parsed.linguisticPatterns?.emotionalIntensity || "unknown",
         },
+        therapeuticRecommendations: parsed.therapeuticRecommendations || {},
       };
     } catch (error) {
       console.error("Failed to parse AI analysis response:", error);
-      return this.getFallbackAnalysis(response);
+      return this.getEnhancedFallbackAnalysis(
+        response,
+        linguisticAnalysis,
+        keywordAnalysis,
+      );
     }
   }
 
-  private parseResponseData(response: string): AIResponse {
+  private parseEnhancedResponseData(
+    response: string,
+    riskLevel: "low" | "medium" | "high",
+  ): AIResponse {
     try {
       const cleanResponse = response.replace(/```json\n?|\n?```/g, "").trim();
       const parsed = JSON.parse(cleanResponse);
@@ -156,29 +518,44 @@ Keep responses warm, professional, and therapeutically appropriate.
         content:
           parsed.content ||
           "I'm here to listen and support you. How are you feeling right now?",
+        therapeuticTechniques: Array.isArray(parsed.therapeuticTechniques)
+          ? parsed.therapeuticTechniques
+          : [],
         supportiveElements: Array.isArray(parsed.supportiveElements)
           ? parsed.supportiveElements
           : [],
         recommendedActions: Array.isArray(parsed.recommendedActions)
           ? parsed.recommendedActions
           : [],
+        copingStrategies: Array.isArray(parsed.copingStrategies)
+          ? parsed.copingStrategies
+          : [],
         riskAssessment: {
-          level: parsed.riskAssessment?.level || "low",
+          level: riskLevel,
           reasoning:
             parsed.riskAssessment?.reasoning || "Standard supportive response",
           confidence: Math.max(
             0,
             Math.min(1, parsed.riskAssessment?.confidence || 0.7),
           ),
+          safetyPlan: Array.isArray(parsed.riskAssessment?.safetyPlan)
+            ? parsed.riskAssessment.safetyPlan
+            : [],
         },
+        followUpSuggestions: Array.isArray(parsed.followUpSuggestions)
+          ? parsed.followUpSuggestions
+          : [],
+        resourceRecommendations: Array.isArray(parsed.resourceRecommendations)
+          ? parsed.resourceRecommendations
+          : [],
       };
     } catch (error) {
       console.error("Failed to parse AI response:", error);
-      return this.getFallbackResponse("low");
+      return this.getEnhancedFallbackResponse(riskLevel);
     }
   }
 
-  private getFallbackAnalysis(text: string): AnalysisResult {
+  private getEnhancedFallbackAnalysis(text: string): AnalysisResult {
     const depressionKeywords = [
       "sad",
       "depressed",
@@ -270,16 +647,20 @@ Keep responses warm, professional, and therapeutically appropriate.
       confidence,
       score: totalScore,
       keywords: [...foundDepKeywords, ...foundPosKeywords],
+      clinicalIndicators: {},
       linguisticPatterns: {
         firstPersonCount,
         negationCount,
         depressionKeywords: foundDepKeywords,
         positiveKeywords: foundPosKeywords,
+        sentenceComplexity: "unknown",
+        emotionalIntensity: "unknown",
       },
+      therapeuticRecommendations: {},
     };
   }
 
-  private getFallbackResponse(
+  private getEnhancedFallbackResponse(
     riskLevel: "low" | "medium" | "high",
   ): AIResponse {
     const responses = {
