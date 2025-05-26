@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useRef, RefObject } from "react";
-import { Brain } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Brain, Sparkles, Shield, Activity } from "lucide-react";
 import { LazyMotion, domAnimation, motion } from "framer-motion";
 import { useDepressionDetection } from "../model/use-depression-detection";
 import { ChatInterface } from "../ui/chat-interface";
@@ -21,7 +21,13 @@ const DepressionDetectionSystem = () => {
   } = useDepressionDetection();
 
   const [inputText, setInputText] = useState("");
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.history.scrollRestoration = "manual";
+      window.scrollTo(0, 0);
+    }
+  }, []);
 
   const handleSendMessage = async () => {
     if (!inputText.trim()) return;
@@ -36,10 +42,6 @@ const DepressionDetectionSystem = () => {
       handleSendMessage();
     }
   };
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
 
   const getRiskLevelColor = (level: string) => {
     switch (level) {
@@ -56,65 +58,107 @@ const DepressionDetectionSystem = () => {
 
   return (
     <LazyMotion features={domAnimation}>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
-        <div className="max-w-7xl mx-auto">
+      <div className="min-h-screen relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-100/50"></div>
+
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute top-20 left-20 w-72 h-72 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-20 right-20 w-96 h-96 bg-gradient-to-r from-indigo-400/20 to-cyan-400/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full blur-3xl animate-pulse delay-500"></div>
+        </div>
+
+        <div className="relative z-10 p-6 max-w-7xl mx-auto">
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-6 mb-6 border border-white/20"
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="mb-8"
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 p-3 rounded-2xl shadow-lg"
-                >
-                  <Brain className="w-8 h-8 text-white" />
-                </motion.div>
-                <div>
-                  <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                    AI Mental Health Assistant
-                  </h1>
-                  <p className="text-gray-600 font-medium">
-                    Intelligent Conversational Agent for Depression Detection &
-                    Support
-                  </p>
+            <div className="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-8 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-purple-600/5 to-indigo-600/5"></div>
+              <div className="pattern-overlay absolute inset-0"></div>
+
+              <div className="relative z-10 flex items-center justify-between">
+                <div className="flex items-center space-x-6">
+                  <motion.div
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="relative"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl blur-lg opacity-30"></div>
+                    <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-3xl shadow-xl">
+                      <Brain className="w-10 h-10 text-white" />
+                      <motion.div
+                        className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full"
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                      >
+                        <Sparkles className="w-3 h-3 text-white m-0.5" />
+                      </motion.div>
+                    </div>
+                  </motion.div>
+
+                  <div className="space-y-2">
+                    <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-800 via-blue-700 to-purple-700 bg-clip-text text-transparent">
+                      AI Mental Health Assistant
+                    </h1>
+                    <p className="text-slate-600 font-medium text-lg flex items-center space-x-2">
+                      <Shield className="w-5 h-5 text-blue-600" />
+                      <span>
+                        Intelligent Conversational Agent for Depression
+                        Detection & Support
+                      </span>
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center space-x-6">
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  className="text-center p-4 bg-blue-50 rounded-xl border border-blue-100"
-                >
-                  <div className="text-sm text-blue-600 font-medium">
-                    Accuracy
-                  </div>
-                  <div className="text-2xl font-bold text-blue-700">
-                    {(systemMetrics.accuracy * 100).toFixed(1)}%
-                  </div>
-                </motion.div>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  className="text-center p-4 bg-green-50 rounded-xl border border-green-100"
-                >
-                  <div className="text-sm text-green-600 font-medium">
-                    Active Sessions
-                  </div>
-                  <div className="text-2xl font-bold text-green-700">
-                    {systemMetrics.activeSessions}
-                  </div>
-                </motion.div>
+
+                <div className="flex items-center space-x-4">
+                  <motion.div
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    className="bg-gradient-to-br from-blue-50 to-blue-100/80 backdrop-blur-sm rounded-2xl p-6 border border-blue-200/50 shadow-lg"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <Activity className="w-6 h-6 text-blue-600" />
+                      <div>
+                        <div className="text-sm text-blue-700 font-semibold">
+                          Detection Accuracy
+                        </div>
+                        <div className="text-3xl font-bold text-blue-800">
+                          {(systemMetrics.accuracy * 100).toFixed(1)}%
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  <motion.div
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    className="bg-gradient-to-br from-emerald-50 to-emerald-100/80 backdrop-blur-sm rounded-2xl p-6 border border-emerald-200/50 shadow-lg"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="w-6 h-6 bg-emerald-600 rounded-full flex items-center justify-center">
+                        <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                      </div>
+                      <div>
+                        <div className="text-sm text-emerald-700 font-semibold">
+                          Active Sessions
+                        </div>
+                        <div className="text-3xl font-bold text-emerald-800">
+                          {systemMetrics.activeSessions}
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                </div>
               </div>
             </div>
           </motion.div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="flex flex-col xl:flex-row gap-8">
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
+              initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="lg:col-span-3"
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="xl:w-3/4"
             >
               <ChatInterface
                 messages={messages}
@@ -127,49 +171,81 @@ const DepressionDetectionSystem = () => {
                 onKeyPress={handleKeyPress}
                 onToggleListening={toggleListening}
                 getRiskLevelColor={getRiskLevelColor}
-                messagesEndRef={messagesEndRef as RefObject<HTMLDivElement>}
               />
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
+              initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="space-y-6"
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="space-y-6 xl:w-1/4"
             >
               <UserProfileCard
                 userProfile={userProfile}
                 getRiskLevelColor={getRiskLevelColor}
               />
-              <SystemMetricsCard systemMetrics={systemMetrics} />
-              <SupportResourcesCard />
             </motion.div>
           </div>
 
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="mt-6 bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-4 border border-white/20"
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="flex flex-col lg:flex-row mt-6 gap-6"
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-6 text-sm text-gray-600">
-                <span className="flex items-center space-x-2">
-                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                  <span className="font-medium">End-to-end encrypted</span>
-                </span>
-                <span className="flex items-center space-x-2">
-                  <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
-                  <span className="font-medium">ML-powered analysis</span>
-                </span>
-                <span className="flex items-center space-x-2">
-                  <span className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></span>
-                  <span className="font-medium">Real-time processing</span>
-                </span>
-              </div>
-              <div className="text-xs text-gray-500 font-medium">
-                Based on research by Mohamad Dzul Syakimin - University of
-                Malaya
+            <div className="flex-1">
+              <SystemMetricsCard systemMetrics={systemMetrics} />
+            </div>
+            <div className="flex-1">
+              <SupportResourcesCard />
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+            className="mt-8"
+          >
+            <div className="bg-white/60 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 p-6 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-slate-50/50 via-blue-50/30 to-purple-50/50"></div>
+
+              <div className="relative z-10 flex items-center justify-between">
+                <div className="flex items-center space-x-8">
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    className="flex items-center space-x-3 px-4 py-2 bg-emerald-50/80 rounded-2xl border border-emerald-200/50"
+                  >
+                    <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse shadow-lg"></div>
+                    <span className="text-emerald-700 font-semibold text-sm">
+                      End-to-end encrypted
+                    </span>
+                  </motion.div>
+
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    className="flex items-center space-x-3 px-4 py-2 bg-blue-50/80 rounded-2xl border border-blue-200/50"
+                  >
+                    <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse shadow-lg"></div>
+                    <span className="text-blue-700 font-semibold text-sm">
+                      ML-powered analysis
+                    </span>
+                  </motion.div>
+
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    className="flex items-center space-x-3 px-4 py-2 bg-purple-50/80 rounded-2xl border border-purple-200/50"
+                  >
+                    <div className="w-3 h-3 bg-purple-500 rounded-full animate-pulse shadow-lg"></div>
+                    <span className="text-purple-700 font-semibold text-sm">
+                      Real-time processing
+                    </span>
+                  </motion.div>
+                </div>
+
+                <div className="text-sm text-slate-500 font-medium bg-slate-50/80 px-4 py-2 rounded-2xl border border-slate-200/50">
+                  Research by Mohamad Dzul Syakimin - University of Malaya
+                </div>
               </div>
             </div>
           </motion.div>

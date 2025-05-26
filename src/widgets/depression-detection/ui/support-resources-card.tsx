@@ -7,6 +7,9 @@ import {
   Users,
   BookOpen,
   Headphones,
+  Shield,
+  ArrowRight,
+  Sparkles,
 } from "lucide-react";
 
 export const SupportResourcesCard: React.FC = () => {
@@ -67,163 +70,271 @@ export const SupportResourcesCard: React.FC = () => {
     },
   ];
 
-  const getColorClasses = (color: string, urgent: boolean = false) => {
-    const baseClasses = urgent
-      ? "bg-gradient-to-r border-2 shadow-lg transform hover:scale-105"
-      : "bg-gradient-to-r border hover:shadow-lg transform hover:scale-102";
-
-    switch (color) {
-      case "red":
-        return `${baseClasses} from-red-50 to-red-100 border-red-200 hover:from-red-100 hover:to-red-200`;
-      case "blue":
-        return `${baseClasses} from-blue-50 to-blue-100 border-blue-200 hover:from-blue-100 hover:to-blue-200`;
-      case "green":
-        return `${baseClasses} from-green-50 to-green-100 border-green-200 hover:from-green-100 hover:to-green-200`;
-      case "purple":
-        return `${baseClasses} from-purple-50 to-purple-100 border-purple-200 hover:from-purple-100 hover:to-purple-200`;
-      case "indigo":
-        return `${baseClasses} from-indigo-50 to-indigo-100 border-indigo-200 hover:from-indigo-100 hover:to-indigo-200`;
-      default:
-        return `${baseClasses} from-gray-50 to-gray-100 border-gray-200 hover:from-gray-100 hover:to-gray-200`;
-    }
-  };
-
-  const getIconColor = (color: string) => {
-    switch (color) {
-      case "red":
-        return "text-red-600";
-      case "blue":
-        return "text-blue-600";
-      case "green":
-        return "text-green-600";
-      case "purple":
-        return "text-purple-600";
-      case "indigo":
-        return "text-indigo-600";
-      default:
-        return "text-gray-600";
-    }
-  };
-
-  const getTextColor = (color: string) => {
-    switch (color) {
-      case "red":
-        return "text-red-800";
-      case "blue":
-        return "text-blue-800";
-      case "green":
-        return "text-green-800";
-      case "purple":
-        return "text-purple-800";
-      case "indigo":
-        return "text-indigo-800";
-      default:
-        return "text-gray-800";
-    }
-  };
-
   return (
     <motion.div
-      whileHover={{ scale: 1.02 }}
-      className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-white/20"
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 relative overflow-hidden"
     >
-      <h3 className="font-bold text-gray-800 mb-6 flex items-center text-lg">
-        <motion.div
-          whileHover={{ rotate: 360 }}
-          transition={{ duration: 0.5 }}
-          className="mr-3 p-2 bg-red-100 rounded-xl"
-        >
-          <Heart className="w-5 h-5 text-red-600" />
-        </motion.div>
-        Support Resources
-      </h3>
+      <div className="absolute inset-0 bg-gradient-to-br from-rose-50/40 via-white/20 to-pink-50/40"></div>
+      <div className="pattern-overlay absolute inset-0 opacity-20"></div>
 
-      <div className="space-y-3">
-        {resources.map((resource, index) => {
-          const IconComponent = resource.icon;
-
-          return (
-            <motion.button
-              key={resource.id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.1 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={resource.action}
-              className={`w-full text-left p-4 rounded-xl transition-all duration-200 ${getColorClasses(resource.color, resource.urgent)}`}
+      <div className="relative z-10 p-8">
+        <div className="flex items-center justify-between mb-8">
+          <h3 className="font-bold text-slate-800 text-xl flex items-center">
+            <motion.div
+              whileHover={{ rotate: 360, scale: 1.1 }}
+              transition={{ duration: 0.6 }}
+              className="mr-4 relative"
             >
-              <div className="flex items-center space-x-3">
-                <motion.div
-                  whileHover={{
-                    rotate: resource.urgent ? [0, -10, 10, -10, 0] : 360,
-                  }}
-                  transition={{ duration: resource.urgent ? 0.5 : 0.3 }}
-                  className={`p-2 rounded-lg bg-white/50 ${resource.urgent ? "animate-pulse" : ""}`}
+              <div className="absolute inset-0 bg-gradient-to-r from-rose-600 to-pink-600 rounded-2xl blur-lg opacity-30"></div>
+              <div className="relative bg-gradient-to-r from-rose-600 to-pink-600 p-3 rounded-2xl shadow-lg">
+                <Heart className="w-6 h-6 text-white" />
+              </div>
+            </motion.div>
+            Support Resources
+          </h3>
+          <motion.div
+            animate={{ rotate: [0, 10, -10, 0] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <Shield className="w-6 h-6 text-rose-500" />
+          </motion.div>
+        </div>
+
+        <div className="space-y-4">
+          {resources.map((resource, index) => {
+            const IconComponent = resource.icon;
+
+            return (
+              <motion.button
+                key={resource.id}
+                initial={{ opacity: 0, x: -30, scale: 0.9 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                transition={{
+                  delay: index * 0.1,
+                  duration: 0.5,
+                  ease: "easeOut",
+                }}
+                whileHover={{ scale: 1.03, x: 6, y: -2 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={resource.action}
+                className="w-full text-left relative overflow-hidden rounded-2xl group"
+              >
+                <div
+                  className={`absolute inset-0 ${
+                    resource.urgent
+                      ? "bg-gradient-to-br from-red-50/90 to-rose-50/90"
+                      : resource.color === "blue"
+                        ? "bg-gradient-to-br from-blue-50/90 to-indigo-50/90"
+                        : resource.color === "green"
+                          ? "bg-gradient-to-br from-emerald-50/90 to-green-50/90"
+                          : resource.color === "purple"
+                            ? "bg-gradient-to-br from-purple-50/90 to-violet-50/90"
+                            : "bg-gradient-to-br from-indigo-50/90 to-blue-50/90"
+                  } backdrop-blur-sm`}
+                ></div>
+
+                <div
+                  className={`relative p-6 border ${
+                    resource.urgent
+                      ? "border-red-200/60"
+                      : resource.color === "blue"
+                        ? "border-blue-200/60"
+                        : resource.color === "green"
+                          ? "border-emerald-200/60"
+                          : resource.color === "purple"
+                            ? "border-purple-200/60"
+                            : "border-indigo-200/60"
+                  } rounded-2xl transition-all duration-300`}
                 >
-                  <IconComponent
-                    className={`w-5 h-5 ${getIconColor(resource.color)}`}
-                  />
-                </motion.div>
-                <div className="flex-1">
-                  <div
-                    className={`text-sm font-bold ${getTextColor(resource.color)} ${resource.urgent ? "text-base" : ""}`}
-                  >
-                    {resource.title}
-                    {resource.urgent && (
-                      <motion.span
-                        animate={{ opacity: [1, 0.5, 1] }}
-                        transition={{ duration: 1, repeat: Infinity }}
-                        className="ml-2 text-red-600"
+                  {resource.urgent && (
+                    <motion.div
+                      animate={{ opacity: [0.3, 0.8, 0.3] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                      className="absolute top-2 right-2 w-3 h-3 bg-red-500 rounded-full shadow-lg"
+                    ></motion.div>
+                  )}
+
+                  <div className="flex items-center space-x-4">
+                    <motion.div
+                      whileHover={{
+                        rotate: resource.urgent ? [0, -15, 15, -15, 0] : 360,
+                        scale: 1.1,
+                      }}
+                      transition={{ duration: resource.urgent ? 0.6 : 0.4 }}
+                      className="relative"
+                    >
+                      <div
+                        className={`absolute inset-0 ${
+                          resource.urgent
+                            ? "bg-red-200/50"
+                            : resource.color === "blue"
+                              ? "bg-blue-200/50"
+                              : resource.color === "green"
+                                ? "bg-emerald-200/50"
+                                : resource.color === "purple"
+                                  ? "bg-purple-200/50"
+                                  : "bg-indigo-200/50"
+                        } rounded-2xl blur-md`}
+                      ></div>
+                      <div
+                        className={`relative p-3 rounded-2xl shadow-lg ${
+                          resource.urgent
+                            ? "bg-gradient-to-br from-red-100 to-rose-100"
+                            : resource.color === "blue"
+                              ? "bg-gradient-to-br from-blue-100 to-indigo-100"
+                              : resource.color === "green"
+                                ? "bg-gradient-to-br from-emerald-100 to-green-100"
+                                : resource.color === "purple"
+                                  ? "bg-gradient-to-br from-purple-100 to-violet-100"
+                                  : "bg-gradient-to-br from-indigo-100 to-blue-100"
+                        }`}
                       >
-                        🚨
-                      </motion.span>
-                    )}
-                  </div>
-                  <div
-                    className={`text-xs ${getTextColor(resource.color)} opacity-80`}
-                  >
-                    {resource.description}
+                        <IconComponent
+                          className={`w-6 h-6 ${
+                            resource.urgent
+                              ? "text-red-600"
+                              : resource.color === "blue"
+                                ? "text-blue-600"
+                                : resource.color === "green"
+                                  ? "text-emerald-600"
+                                  : resource.color === "purple"
+                                    ? "text-purple-600"
+                                    : "text-indigo-600"
+                          }`}
+                        />
+                      </div>
+                    </motion.div>
+
+                    <div className="flex-1 space-y-1">
+                      <div
+                        className={`font-bold flex items-center space-x-2 ${
+                          resource.urgent
+                            ? "text-red-800 text-base"
+                            : resource.color === "blue"
+                              ? "text-blue-800 text-sm"
+                              : resource.color === "green"
+                                ? "text-emerald-800 text-sm"
+                                : resource.color === "purple"
+                                  ? "text-purple-800 text-sm"
+                                  : "text-indigo-800 text-sm"
+                        }`}
+                      >
+                        <span>{resource.title}</span>
+                        {resource.urgent && (
+                          <motion.div
+                            animate={{
+                              scale: [1, 1.2, 1],
+                              rotate: [0, 10, -10, 0],
+                            }}
+                            transition={{ duration: 1, repeat: Infinity }}
+                            className="text-red-600"
+                          >
+                            <AlertTriangle className="w-4 h-4" />
+                          </motion.div>
+                        )}
+                      </div>
+                      <div
+                        className={`text-xs font-medium ${
+                          resource.urgent
+                            ? "text-red-700"
+                            : resource.color === "blue"
+                              ? "text-blue-700"
+                              : resource.color === "green"
+                                ? "text-emerald-700"
+                                : resource.color === "purple"
+                                  ? "text-purple-700"
+                                  : "text-indigo-700"
+                        } opacity-90`}
+                      >
+                        {resource.description}
+                      </div>
+                    </div>
+
+                    <motion.div
+                      whileHover={{ x: 4, scale: 1.1 }}
+                      className={`p-2 rounded-xl ${
+                        resource.urgent
+                          ? "bg-red-100/80 text-red-600"
+                          : resource.color === "blue"
+                            ? "bg-blue-100/80 text-blue-600"
+                            : resource.color === "green"
+                              ? "bg-emerald-100/80 text-emerald-600"
+                              : resource.color === "purple"
+                                ? "bg-purple-100/80 text-purple-600"
+                                : "bg-indigo-100/80 text-indigo-600"
+                      } group-hover:shadow-lg transition-all duration-300`}
+                    >
+                      <ArrowRight className="w-5 h-5" />
+                    </motion.div>
                   </div>
                 </div>
+              </motion.button>
+            );
+          })}
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6, duration: 0.5 }}
+          className="mt-8 relative overflow-hidden rounded-2xl"
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-50/90 to-orange-50/90 backdrop-blur-sm"></div>
+          <div className="relative p-6 border border-amber-200/50 rounded-2xl">
+            <div className="text-center space-y-3">
+              <div className="flex items-center justify-center space-x-2">
                 <motion.div
-                  whileHover={{ x: 5 }}
-                  className={`text-lg ${getTextColor(resource.color)}`}
+                  animate={{ rotate: [0, 360] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
                 >
-                  →
+                  <Sparkles className="w-5 h-5 text-amber-600" />
+                </motion.div>
+                <div className="text-sm font-bold text-amber-800">
+                  Remember: You&apos;re Not Alone
+                </div>
+                <motion.div
+                  animate={{ rotate: [0, -360] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                >
+                  <Sparkles className="w-5 h-5 text-amber-600" />
                 </motion.div>
               </div>
-            </motion.button>
-          );
-        })}
+              <div className="text-xs text-amber-700 font-medium">
+                Professional help is available 24/7. Your mental health matters.
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8, duration: 0.5 }}
+          className="mt-4 relative overflow-hidden rounded-2xl"
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-red-50/90 to-rose-50/90 backdrop-blur-sm"></div>
+          <div className="relative p-4 border border-red-200/50 rounded-2xl">
+            <div className="text-center">
+              <div className="flex items-center justify-center space-x-2">
+                <motion.div
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="w-2 h-2 bg-red-500 rounded-full"
+                ></motion.div>
+                <div className="text-xs text-red-700 font-bold">
+                  Emergency: Call 988 (Suicide & Crisis Lifeline)
+                </div>
+                <motion.div
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 2, repeat: Infinity, delay: 1 }}
+                  className="w-2 h-2 bg-red-500 rounded-full"
+                ></motion.div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
       </div>
-
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-        className="mt-6 p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-200"
-      >
-        <div className="text-center">
-          <div className="text-sm font-bold text-amber-800 mb-1">
-            Remember: You&apos;re Not Alone
-          </div>
-          <div className="text-xs text-amber-700">
-            Professional help is available 24/7. Your mental health matters.
-          </div>
-        </div>
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.7 }}
-        className="mt-3 text-center"
-      >
-        <div className="text-xs text-gray-500 font-medium">
-          Emergency: Call 988 (Suicide & Crisis Lifeline)
-        </div>
-      </motion.div>
     </motion.div>
   );
 };
