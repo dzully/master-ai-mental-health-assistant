@@ -4,6 +4,7 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, Send, Mic, MicOff, User, Bot } from "lucide-react";
 import { Message, UserProfile } from "../model/types";
+import { formatTimestamp } from "@/shared/lib/date-utils";
 
 interface ChatInterfaceProps {
   messages: Message[];
@@ -92,10 +93,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                     <p className="text-sm leading-relaxed">{message.content}</p>
                     <div className="flex items-center justify-between mt-3">
                       <span className="text-xs opacity-70 font-medium">
-                        {message.timestamp.toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                        {formatTimestamp(message.timestamp)}
                       </span>
                       {message.confidence && (
                         <div className="flex items-center space-x-2">

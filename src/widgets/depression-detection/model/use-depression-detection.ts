@@ -1,15 +1,16 @@
 import { useState, useCallback, useRef } from "react";
 import { Message, UserProfile, SystemMetrics, AnalysisResult } from "./types";
 import { AIService } from "./ai-service";
+import { useHydrationSafeDate } from "@/shared/lib/use-hydration-safe-date";
 
-const initialUserProfile: UserProfile = {
+const createInitialUserProfile = (date: Date): UserProfile => ({
   riskLevel: "low",
   sessionCount: 1,
-  lastInteraction: new Date(),
+  lastInteraction: date,
   sentimentHistory: [],
   totalMessages: 0,
   averageConfidence: 0.8,
-};
+});
 
 const initialSystemMetrics: SystemMetrics = {
   accuracy: 0.87,
@@ -20,22 +21,27 @@ const initialSystemMetrics: SystemMetrics = {
   uptime: 99.8,
 };
 
-const initialMessages: Message[] = [
+const createInitialMessages = (date: Date): Message[] => [
   {
     id: 1,
     type: "bot",
     content:
       "Hello! I'm here to listen and support you. How are you feeling today?",
-    timestamp: new Date(),
+    timestamp: date,
     sentiment: "neutral",
     confidence: 0.8,
   },
 ];
 
 export const useDepressionDetection = () => {
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
-  const [userProfile, setUserProfile] =
-    useState<UserProfile>(initialUserProfile);
+  const { createNewDate } = useHydrationSafeDate();
+
+  const [messages, setMessages] = useState<Message[]>(() =>
+    createInitialMessages(createNewDate()),
+  );
+  const [userProfile, setUserProfile] = useState<UserProfile>(() =>
+    createInitialUserProfile(createNewDate()),
+  );
   const [systemMetrics, setSystemMetrics] =
     useState<SystemMetrics>(initialSystemMetrics);
   const [isTyping, setIsTyping] = useState(false);
@@ -44,27 +50,30 @@ export const useDepressionDetection = () => {
   const aiService = useRef(new AIService());
   const conversationHistory = useRef<string[]>([]);
 
-  const updateUserProfile = useCallback((analysis: AnalysisResult) => {
-    setUserProfile((prev) => {
-      const newSentimentHistory = [
-        ...prev.sentimentHistory.slice(-9),
-        analysis.sentiment,
-      ];
-      const totalMessages = prev.totalMessages + 1;
-      const averageConfidence =
-        (prev.averageConfidence * prev.totalMessages + analysis.confidence) /
-        totalMessages;
+  const updateUserProfile = useCallback(
+    (analysis: AnalysisResult) => {
+      setUserProfile((prev) => {
+        const newSentimentHistory = [
+          ...prev.sentimentHistory.slice(-9),
+          analysis.sentiment,
+        ];
+        const totalMessages = prev.totalMessages + 1;
+        const averageConfidence =
+          (prev.averageConfidence * prev.totalMessages + analysis.confidence) /
+          totalMessages;
 
-      return {
-        ...prev,
-        riskLevel: analysis.riskLevel,
-        sentimentHistory: newSentimentHistory,
-        totalMessages,
-        averageConfidence,
-        lastInteraction: new Date(),
-      };
-    });
-  }, []);
+        return {
+          ...prev,
+          riskLevel: analysis.riskLevel,
+          sentimentHistory: newSentimentHistory,
+          totalMessages,
+          averageConfidence,
+          lastInteraction: createNewDate(),
+        };
+      });
+    },
+    [createNewDate],
+  );
 
   const updateSystemMetrics = useCallback((analysis: AnalysisResult) => {
     setSystemMetrics((prev) => ({
@@ -118,7 +127,7 @@ export const useDepressionDetection = () => {
         id: messages.length + 1,
         type: "user",
         content: text,
-        timestamp: new Date(),
+        timestamp: createNewDate(),
       };
 
       setMessages((prev) => [...prev, userMessage]);
@@ -140,7 +149,7 @@ export const useDepressionDetection = () => {
               id: messages.length + 2,
               type: "bot",
               content: aiResponse.content,
-              timestamp: new Date(),
+              timestamp: createNewDate(),
               sentiment: analysis.sentiment,
               confidence: analysis.confidence,
               riskLevel: analysis.riskLevel,
@@ -161,7 +170,7 @@ export const useDepressionDetection = () => {
             type: "bot",
             content:
               "I'm here to listen and support you. Could you tell me more about how you're feeling?",
-            timestamp: new Date(),
+            timestamp: createNewDate(),
             sentiment: "neutral",
             confidence: 0.7,
           };
@@ -171,7 +180,7 @@ export const useDepressionDetection = () => {
         }, 1500);
       }
     },
-    [messages.length, processUserInput],
+    [messages.length, processUserInput, createNewDate],
   );
 
   const toggleListening = useCallback(() => {
@@ -179,7 +188,7 @@ export const useDepressionDetection = () => {
   }, []);
 
   const clearConversation = useCallback(() => {
-    setMessages(initialMessages);
+    setMessages(createInitialMessages(createNewDate()));
     conversationHistory.current = [];
     setUserProfile((prev) => ({
       ...prev,
@@ -187,14 +196,14 @@ export const useDepressionDetection = () => {
       sentimentHistory: [],
       totalMessages: 0,
     }));
-  }, []);
+  }, [createNewDate]);
 
   const exportConversation = useCallback(() => {
     const conversationData = {
       messages,
       userProfile,
       systemMetrics,
-      timestamp: new Date().toISOString(),
+      timestamp: createNewDate().toISOString(),
     };
 
     const blob = new Blob([JSON.stringify(conversationData, null, 2)], {
@@ -204,12 +213,12 @@ export const useDepressionDetection = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `mental-health-session-${new Date().toISOString().split("T")[0]}.json`;
+    a.download = `mental-health-session-${createNewDate().toISOString().split("T")[0]}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  }, [messages, userProfile, systemMetrics]);
+  }, [messages, userProfile, systemMetrics, createNewDate]);
 
   return {
     messages,
