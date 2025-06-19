@@ -3,22 +3,31 @@
 import React, { useState, useEffect } from "react";
 import { Brain, Sparkles, Shield, Activity } from "lucide-react";
 import { LazyMotion, domAnimation, motion } from "framer-motion";
-import { useDepressionDetection } from "../model/use-depression-detection";
+import { useChatSessionManager } from "../model/use-chat-session-manager";
 import { ChatInterface } from "../ui/chat-interface";
 import { UserProfileCard } from "../ui/user-profile-card";
 import { SystemMetricsCard } from "../ui/system-metrics-card";
 import { SupportResourcesCard } from "../ui/support-resources-card";
+import { ChatSessionSidebar } from "../ui/chat-session-sidebar";
+import { SidebarToggleButton } from "../ui/sidebar-toggle-button";
 
 const DepressionDetectionSystem = () => {
   const {
-    messages,
-    userProfile,
+    currentSession,
+    sessionsList,
     systemMetrics,
     isTyping,
     isListening,
+    sidebarVisible,
     sendMessage,
     toggleListening,
-  } = useDepressionDetection();
+    toggleSidebar,
+    createNewSession,
+    selectSession,
+    deleteSession,
+    exportSessions,
+    importSessions,
+  } = useChatSessionManager();
 
   const [inputText, setInputText] = useState("");
 
@@ -160,18 +169,20 @@ const DepressionDetectionSystem = () => {
               transition={{ duration: 0.8, delay: 0.2 }}
               className="xl:w-3/4"
             >
-              <ChatInterface
-                messages={messages}
-                isTyping={isTyping}
-                isListening={isListening}
-                inputText={inputText}
-                userProfile={userProfile}
-                onInputChange={setInputText}
-                onSendMessage={handleSendMessage}
-                onKeyPress={handleKeyPress}
-                onToggleListening={toggleListening}
-                getRiskLevelColor={getRiskLevelColor}
-              />
+              {currentSession && (
+                <ChatInterface
+                  messages={currentSession.messages}
+                  isTyping={isTyping}
+                  isListening={isListening}
+                  inputText={inputText}
+                  userProfile={currentSession.userProfile}
+                  onInputChange={setInputText}
+                  onSendMessage={handleSendMessage}
+                  onKeyPress={handleKeyPress}
+                  onToggleListening={toggleListening}
+                  getRiskLevelColor={getRiskLevelColor}
+                />
+              )}
             </motion.div>
 
             <motion.div
@@ -180,10 +191,12 @@ const DepressionDetectionSystem = () => {
               transition={{ duration: 0.8, delay: 0.4 }}
               className="space-y-6 xl:w-1/4"
             >
-              <UserProfileCard
-                userProfile={userProfile}
-                getRiskLevelColor={getRiskLevelColor}
-              />
+              {currentSession && (
+                <UserProfileCard
+                  userProfile={currentSession.userProfile}
+                  getRiskLevelColor={getRiskLevelColor}
+                />
+              )}
             </motion.div>
           </div>
 
@@ -250,6 +263,24 @@ const DepressionDetectionSystem = () => {
             </div>
           </motion.div>
         </div>
+
+        <SidebarToggleButton
+          isVisible={sidebarVisible}
+          onClick={toggleSidebar}
+          sessionCount={sessionsList.length}
+        />
+
+        <ChatSessionSidebar
+          sessions={sessionsList}
+          activeSessionId={currentSession?.id || null}
+          isVisible={sidebarVisible}
+          onCreateSession={createNewSession}
+          onSelectSession={selectSession}
+          onDeleteSession={deleteSession}
+          onExportSessions={exportSessions}
+          onImportSessions={importSessions}
+          onToggleSidebar={toggleSidebar}
+        />
       </div>
     </LazyMotion>
   );

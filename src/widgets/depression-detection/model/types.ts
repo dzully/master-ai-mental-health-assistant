@@ -98,3 +98,34 @@ export interface ConversationalContext {
   escalatingConcerns: boolean;
   conversationLength: number;
 }
+
+export interface ChatSession {
+  id: string;
+  title: string;
+  messages: Message[];
+  userProfile: UserProfile;
+  createdAt: Date;
+  updatedAt: Date;
+  isActive: boolean;
+  sessionSummary?: SessionSummary;
+}
+
+export interface SessionSummary {
+  messageCount: number;
+  averageRiskLevel: "low" | "medium" | "high";
+  dominantSentiment: "positive" | "neutral" | "concerning" | "negative";
+  keyTopics: string[];
+  sessionDuration: number;
+  lastMessage: string;
+}
+
+export interface ChatSessionMetadata {
+  id: string;
+  title: string;
+  createdAt: Date;
+  updatedAt: Date;
+  messageCount: number;
+  lastMessage: string;
+  riskLevel: "low" | "medium" | "high";
+  isActive: boolean;
+}

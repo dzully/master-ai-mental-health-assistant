@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { Message, UserProfile, SystemMetrics, AnalysisResult } from "./types";
 import { AIService } from "./ai-service";
 import { useHydrationSafeDate } from "@/shared/lib/use-hydration-safe-date";
@@ -36,19 +36,38 @@ const createInitialMessages = (date: Date): Message[] => [
 export const useDepressionDetection = () => {
   const { createNewDate } = useHydrationSafeDate();
 
-  const [messages, setMessages] = useState<Message[]>(() =>
-    createInitialMessages(createNewDate()),
-  );
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isTyping, setIsTyping] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile>(() =>
-    createInitialUserProfile(createNewDate()),
+    createInitialUserProfile(new Date()),
   );
   const [systemMetrics, setSystemMetrics] =
     useState<SystemMetrics>(initialSystemMetrics);
-  const [isTyping, setIsTyping] = useState(false);
-  const [isListening, setIsListening] = useState(false);
 
   const aiService = useRef(new AIService());
   const conversationHistory = useRef<string[]>([]);
+
+  // Test AI connection on component mount
+  useEffect(() => {
+    const testAI = async () => {
+      console.log("🔍 Testing AI connection...");
+      const isConnected = await aiService.current.testConnection();
+      if (isConnected) {
+        console.log("✅ AI connection successful");
+      } else {
+        console.log("❌ AI connection failed - will use fallbacks");
+      }
+    };
+    testAI();
+  }, []);
+
+  useEffect(() => {
+    if (messages.length === 0) {
+      const initialMessages = createInitialMessages(createNewDate());
+      setMessages(initialMessages);
+    }
+  }, [messages.length, createNewDate]);
 
   const updateUserProfile = useCallback(
     (analysis: AnalysisResult) => {

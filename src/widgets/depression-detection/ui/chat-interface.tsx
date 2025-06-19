@@ -28,6 +28,89 @@ interface ChatInterfaceProps {
   getRiskLevelColor: (level: string) => string;
 }
 
+const formatMessageContent = (content: string): React.JSX.Element => {
+  // Split by double line breaks to get paragraphs
+  const paragraphs = content.split("\n\n").filter((p) => p.trim());
+
+  return (
+    <div className="space-y-4">
+      {paragraphs.map((paragraph, pIndex) => {
+        const trimmedParagraph = paragraph.trim();
+
+        // Check if this paragraph contains bullet points
+        const lines = trimmedParagraph.split("\n");
+        const bulletLines = lines.filter((line) => line.trim().startsWith("•"));
+        const nonBulletLines = lines.filter(
+          (line) => !line.trim().startsWith("•"),
+        );
+
+        if (bulletLines.length > 0) {
+          return (
+            <div key={pIndex} className="space-y-3">
+              {/* Render non-bullet lines as regular paragraphs */}
+              {nonBulletLines.map((line, lineIndex) => {
+                const trimmedLine = line.trim();
+                if (trimmedLine) {
+                  return (
+                    <p
+                      key={`p-${lineIndex}`}
+                      className="text-sm leading-relaxed font-medium"
+                    >
+                      {trimmedLine}
+                    </p>
+                  );
+                }
+                return null;
+              })}
+
+              {/* Render bullet points as a styled list */}
+              <ul className="space-y-2 ml-4">
+                {bulletLines.map((line, bulletIndex) => {
+                  const bulletText = line.replace(/^\s*•\s*/, "").trim();
+                  return (
+                    <li
+                      key={`bullet-${bulletIndex}`}
+                      className="flex items-start space-x-3"
+                    >
+                      <span className="text-blue-500 font-bold mt-0.5 text-sm">
+                        •
+                      </span>
+                      <span className="text-sm leading-relaxed font-medium flex-1">
+                        {bulletText}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          );
+        } else {
+          // Regular paragraph - split by single line breaks for line breaks within paragraph
+          const paragraphLines = trimmedParagraph.split("\n");
+          if (paragraphLines.length > 1) {
+            return (
+              <p key={pIndex} className="text-sm leading-relaxed font-medium">
+                {paragraphLines.map((line, lineIndex) => (
+                  <React.Fragment key={lineIndex}>
+                    {line.trim()}
+                    {lineIndex < paragraphLines.length - 1 && <br />}
+                  </React.Fragment>
+                ))}
+              </p>
+            );
+          } else {
+            return (
+              <p key={pIndex} className="text-sm leading-relaxed font-medium">
+                {trimmedParagraph}
+              </p>
+            );
+          }
+        }
+      })}
+    </div>
+  );
+};
+
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   messages,
   isTyping,
@@ -138,9 +221,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                     </motion.div>
 
                     <div className="flex-1 space-y-3">
-                      <p className="text-sm leading-relaxed font-medium">
-                        {message.content}
-                      </p>
+                      {formatMessageContent(message.content)}
 
                       <div className="flex items-center justify-between">
                         <span

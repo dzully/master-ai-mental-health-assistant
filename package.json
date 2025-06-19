@@ -25,16 +25,19 @@
     "react-dom": "19.0.0",
     "react-hook-form": "7.56.4",
     "react-intl": "7.1.11",
+    "uuid": "^11.1.0",
     "zod": "3.25.28",
-    "zustand": "5.0.5"
+    "zustand": "^5.0.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "3",
+    "@tailwindcss/line-clamp": "^0.4.4",
     "@tailwindcss/postcss": "4.1.7",
     "@types/gsap": "3.0.0",
     "@types/node": "20",
     "@types/react": "19",
     "@types/react-dom": "19",
+    "@types/uuid": "^10.0.0",
     "autoprefixer": "10.4.21",
     "eslint": "9",
     "eslint-config-next": "15.3.2",

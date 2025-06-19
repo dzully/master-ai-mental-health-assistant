@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import lineClamp from "@tailwindcss/line-clamp";
 
 const config: Config = {
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
@@ -57,7 +58,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [],
+  plugins: [lineClamp],
 };
 
 export default config;
