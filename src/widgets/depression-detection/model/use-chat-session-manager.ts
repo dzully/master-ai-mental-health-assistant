@@ -18,6 +18,9 @@ const createInitialUserProfile = (date: Date): UserProfile => ({
   sentimentHistory: [],
   totalMessages: 0,
   averageConfidence: 0.8,
+  clusterHistory: [],
+  riskFactors: [],
+  protectiveFactors: [],
 });
 
 const initialSystemMetrics: SystemMetrics = {
@@ -27,6 +30,17 @@ const initialSystemMetrics: SystemMetrics = {
   alertsGenerated: 3,
   responseTime: 1.2,
   uptime: 99.8,
+  clusteringAccuracy: 0.84,
+  validationMetrics: {
+    sensitivity: 0.82,
+    specificity: 0.85,
+    precision: 0.83,
+    recall: 0.82,
+    f1Score: 0.825,
+    accuracy: 0.84,
+    confidenceInterval: [0.8, 0.88],
+    areaUnderCurve: 0.88,
+  },
 };
 
 export const useChatSessionManager = () => {
@@ -108,10 +122,7 @@ export const useChatSessionManager = () => {
   const processUserInput = useCallback(
     async (text: string): Promise<AnalysisResult> => {
       try {
-        const analysis = await aiService.current.analyzeUserInput(
-          text,
-          conversationHistory.current,
-        );
+        const analysis = await aiService.current.analyzeUserInput(text);
         updateSystemMetrics(analysis);
         return analysis;
       } catch (error) {

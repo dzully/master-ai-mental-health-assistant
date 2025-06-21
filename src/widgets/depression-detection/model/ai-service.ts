@@ -6,6 +6,7 @@ import {
   LinguisticAnalysisResult,
   KeywordAnalysisResult,
 } from "./types";
+import { mlClusteringService } from "./ml-clustering-service";
 
 const google = createGoogleGenerativeAI({
   apiKey:
@@ -759,9 +760,50 @@ Generate the response in this EXACT JSON format (ensure all quotes are properly 
     const linguisticAnalysis = this.performLinguisticAnalysis(text);
     const keywordAnalysis = this.performKeywordAnalysis(text);
 
-    // Using fallback analysis for now as the AI analysis part is out of scope of the current issue.
-    // In a real scenario, you might call another AI model here for analysis.
-    return this.getFallbackAnalysis(text, linguisticAnalysis, keywordAnalysis);
+    // Generate base analysis using enhanced fallback method
+    const baseAnalysis = this.getFallbackAnalysis(
+      text,
+      linguisticAnalysis,
+      keywordAnalysis,
+    );
+
+    // Integrate ML clustering if model is available
+    try {
+      const clusterAssignment =
+        await mlClusteringService.assignToCluster(baseAnalysis);
+
+      if (clusterAssignment) {
+        // Enhanced analysis with k-means clustering results
+        const phq9Estimation =
+          mlClusteringService.estimatePHQ9FromCluster(clusterAssignment);
+        const therapeuticRecommendations =
+          mlClusteringService.generateTherapeuticRecommendations(
+            clusterAssignment,
+          );
+
+        return {
+          ...baseAnalysis,
+          clusterAssignment,
+          phq9Estimation,
+          therapeuticRecommendations,
+          clinicalIndicators: {
+            ...baseAnalysis.clinicalIndicators,
+            phq9Score: phq9Estimation.totalScore,
+            severityLevel: phq9Estimation.severityCategory,
+            diagnosticConfidence: phq9Estimation.confidenceLevel,
+            recommendedInterventions: therapeuticRecommendations.interventions,
+          },
+          confidence: Math.max(
+            baseAnalysis.confidence,
+            clusterAssignment.confidence,
+          ),
+        };
+      }
+    } catch (error) {
+      console.error("ML clustering assignment failed:", error);
+    }
+
+    return baseAnalysis;
   }
 
   private performLinguisticAnalysis(text: string): LinguisticAnalysisResult {

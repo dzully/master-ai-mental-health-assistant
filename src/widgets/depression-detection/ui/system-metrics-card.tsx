@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Activity,
   Brain,
@@ -8,9 +8,12 @@ import {
   AlertTriangle,
   TrendingUp,
   Clock,
+  Target,
+  BarChart3,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { SystemMetrics } from "../model/types";
+import { SystemMetrics, ValidationMetrics } from "../model/types";
+import { mlClusteringService } from "../model/ml-clustering-service";
 
 interface SystemMetricsCardProps {
   metrics: SystemMetrics;
@@ -19,7 +22,34 @@ interface SystemMetricsCardProps {
 export const SystemMetricsCard: React.FC<SystemMetricsCardProps> = ({
   metrics,
 }) => {
-  // Clinical performance interpretation based on healthcare standards
+  const [validationMetrics, setValidationMetrics] =
+    useState<ValidationMetrics | null>(null);
+  const [clusteringQuality, setClusteringQuality] = useState<{
+    isModelTrained: boolean;
+    clusterCount: number;
+  }>({
+    isModelTrained: false,
+    clusterCount: 0,
+  });
+
+  useEffect(() => {
+    const fetchClusteringMetrics = () => {
+      const validation = mlClusteringService.getValidationMetrics();
+      const clusters = mlClusteringService.getCurrentClusters();
+
+      setValidationMetrics(validation);
+      setClusteringQuality({
+        isModelTrained: mlClusteringService.isModelTrained(),
+        clusterCount: clusters.length,
+      });
+    };
+
+    fetchClusteringMetrics();
+    const interval = setInterval(fetchClusteringMetrics, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   const getAccuracyGrade = (accuracy: number) => {
     if (accuracy >= 0.85)
       return {
@@ -123,6 +153,46 @@ export const SystemMetricsCard: React.FC<SystemMetricsCardProps> = ({
     },
   ];
 
+  const mlMetricsData = [
+    {
+      title: "K-Means Clustering",
+      value: clusteringQuality.isModelTrained
+        ? `${clusteringQuality.clusterCount} clusters`
+        : "Initializing",
+      subtitle: clusteringQuality.isModelTrained
+        ? "Model trained"
+        : "Training in progress",
+      icon: BarChart3,
+      color: clusteringQuality.isModelTrained ? "emerald" : "yellow",
+      badge: clusteringQuality.isModelTrained ? "Active" : "Training",
+      description:
+        "Research-validated k-means clustering for depression categorization",
+    },
+    {
+      title: "Clinical Validation",
+      value: validationMetrics
+        ? `${(validationMetrics.accuracy * 100).toFixed(1)}%`
+        : "Calculating...",
+      subtitle: validationMetrics
+        ? `Sensitivity: ${(validationMetrics.sensitivity * 100).toFixed(1)}%`
+        : "Validation metrics",
+      icon: Target,
+      color:
+        validationMetrics && validationMetrics.accuracy >= 0.847
+          ? "emerald"
+          : validationMetrics && validationMetrics.accuracy >= 0.8
+            ? "blue"
+            : "yellow",
+      badge:
+        validationMetrics && validationMetrics.accuracy >= 0.847
+          ? "Research Target"
+          : validationMetrics && validationMetrics.accuracy >= 0.8
+            ? "Clinical Grade"
+            : "Improving",
+      description: "Target accuracy: 84.7% based on peer-reviewed research",
+    },
+  ];
+
   const getColorClasses = (color: string) => {
     const colorMap = {
       emerald: {
@@ -186,88 +256,214 @@ export const SystemMetricsCard: React.FC<SystemMetricsCardProps> = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {metricsData.map((metric, index) => {
-          const colors = getColorClasses(metric.color);
-          const IconComponent = metric.icon;
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {metricsData.map((metric, index) => {
+            const colors = getColorClasses(metric.color);
+            const IconComponent = metric.icon;
 
-          return (
-            <motion.div
-              key={metric.title}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.1, duration: 0.4 }}
-              whileHover={{ y: -2, scale: 1.02 }}
-              className={`relative group p-4 bg-gradient-to-br ${colors.light} backdrop-blur-sm rounded-2xl border ${colors.border} shadow-sm hover:shadow-md transition-all duration-300`}
-            >
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center space-x-3">
+            return (
+              <motion.div
+                key={metric.title}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: index * 0.1, duration: 0.4 }}
+                whileHover={{ y: -2, scale: 1.02 }}
+                className={`relative group p-4 bg-gradient-to-br ${colors.light} backdrop-blur-sm rounded-2xl border ${colors.border} shadow-sm hover:shadow-md transition-all duration-300`}
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center space-x-3">
+                    <motion.div
+                      whileHover={{ scale: 1.1, rotate: 5 }}
+                      className={`p-2 bg-gradient-to-r ${colors.bg} rounded-xl shadow-md`}
+                    >
+                      <IconComponent className="w-4 h-4 text-white" />
+                    </motion.div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-slate-700">
+                        {metric.title}
+                      </h4>
+                      <p className="text-xs text-slate-500">
+                        {metric.subtitle}
+                      </p>
+                    </div>
+                  </div>
                   <motion.div
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                    className={`p-2 bg-gradient-to-r ${colors.bg} rounded-xl shadow-md`}
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: index * 0.1 + 0.2 }}
+                    className={`px-2 py-1 rounded-lg text-xs font-medium border ${colors.badge}`}
                   >
-                    <IconComponent className="w-4 h-4 text-white" />
+                    {metric.badge}
                   </motion.div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-slate-700">
-                      {metric.title}
-                    </h4>
-                    <p className="text-xs text-slate-500">{metric.subtitle}</p>
+                </div>
+
+                <div className="mb-3">
+                  <div className={`text-2xl font-bold ${colors.text} mb-1`}>
+                    {metric.value}
                   </div>
                 </div>
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: index * 0.1 + 0.2 }}
-                  className={`px-2 py-1 rounded-lg text-xs font-medium border ${colors.badge}`}
-                >
-                  {metric.badge}
-                </motion.div>
-              </div>
 
-              <div className="mb-3">
-                <div className={`text-2xl font-bold ${colors.text} mb-1`}>
-                  {metric.value}
+                <div className="text-xs text-slate-600 bg-white/50 p-2 rounded-lg">
+                  {metric.description}
+                </div>
+
+                {metric.title === "Detection Accuracy" && (
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${metrics.accuracy * 100}%` }}
+                    transition={{ delay: index * 0.1 + 0.5, duration: 1 }}
+                    className={`absolute bottom-0 left-0 h-1 bg-gradient-to-r ${colors.bg} rounded-b-2xl`}
+                  />
+                )}
+              </motion.div>
+            );
+          })}
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8, duration: 0.5 }}
+          className="border-t border-slate-200 pt-6"
+        >
+          <div className="flex items-center space-x-3 mb-4">
+            <motion.div
+              whileHover={{ scale: 1.1, rotate: 5 }}
+              className="p-2 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl shadow-lg"
+            >
+              <Target className="w-5 h-5 text-white" />
+            </motion.div>
+            <div>
+              <h4 className="text-lg font-bold text-slate-800">
+                ML Research Integration
+              </h4>
+              <p className="text-sm text-slate-600">
+                K-means clustering depression detection
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {mlMetricsData.map((metric, index) => {
+              const colors = getColorClasses(metric.color);
+              const IconComponent = metric.icon;
+
+              return (
+                <motion.div
+                  key={metric.title}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 1.0 + index * 0.1, duration: 0.4 }}
+                  whileHover={{ y: -2, scale: 1.02 }}
+                  className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${colors.light} ${colors.border} border backdrop-blur-sm transition-all duration-300 hover:shadow-lg group`}
+                >
+                  <div className="p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div
+                        className={`p-2 rounded-xl bg-gradient-to-r ${colors.bg} shadow-md group-hover:scale-110 transition-transform duration-300`}
+                      >
+                        <IconComponent className="w-5 h-5 text-white" />
+                      </div>
+                      <motion.span
+                        whileHover={{ scale: 1.05 }}
+                        className={`px-3 py-1 text-xs font-semibold rounded-full border ${colors.badge}`}
+                      >
+                        {metric.badge}
+                      </motion.span>
+                    </div>
+
+                    <div className="space-y-1">
+                      <h4 className={`text-sm font-medium ${colors.text}`}>
+                        {metric.title}
+                      </h4>
+                      <p className="text-2xl font-bold text-slate-800">
+                        {metric.value}
+                      </p>
+                      <p className="text-sm text-slate-600">
+                        {metric.subtitle}
+                      </p>
+                    </div>
+
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      whileHover={{ opacity: 1 }}
+                      className="mt-3 p-2 bg-white/50 rounded-lg transition-opacity duration-300"
+                    >
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        {metric.description}
+                      </p>
+                    </motion.div>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          {validationMetrics && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.4, duration: 0.5 }}
+              className="mt-4 p-4 bg-gradient-to-r from-cyan-50 to-blue-50 rounded-2xl border border-cyan-200/50"
+            >
+              <h5 className="text-sm font-semibold text-cyan-800 mb-3 flex items-center">
+                <Target className="w-4 h-4 mr-2" />
+                Detailed Validation Metrics
+              </h5>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="text-center">
+                  <p className="text-lg font-bold text-cyan-700">
+                    {(validationMetrics.sensitivity * 100).toFixed(1)}%
+                  </p>
+                  <p className="text-xs text-cyan-600">Sensitivity</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-lg font-bold text-cyan-700">
+                    {(validationMetrics.specificity * 100).toFixed(1)}%
+                  </p>
+                  <p className="text-xs text-cyan-600">Specificity</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-lg font-bold text-cyan-700">
+                    {(validationMetrics.precision * 100).toFixed(1)}%
+                  </p>
+                  <p className="text-xs text-cyan-600">Precision</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-lg font-bold text-cyan-700">
+                    {(validationMetrics.f1Score * 100).toFixed(1)}%
+                  </p>
+                  <p className="text-xs text-cyan-600">F1-Score</p>
                 </div>
               </div>
-
-              <div className="text-xs text-slate-600 bg-white/50 p-2 rounded-lg">
-                {metric.description}
+              <div className="mt-3 text-xs text-cyan-700 text-center">
+                Research Target: 84.7% accuracy with k=4 or k=8 clusters
               </div>
-
-              {/* Performance indicator */}
-              {metric.title === "Detection Accuracy" && (
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${metrics.accuracy * 100}%` }}
-                  transition={{ delay: index * 0.1 + 0.5, duration: 1 }}
-                  className={`absolute bottom-0 left-0 h-1 bg-gradient-to-r ${colors.bg} rounded-b-2xl`}
-                />
-              )}
             </motion.div>
-          );
-        })}
-      </div>
+          )}
+        </motion.div>
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.8 }}
-        className="mt-6 p-4 bg-gradient-to-r from-slate-50 to-slate-100/50 rounded-xl border border-slate-200/50"
-      >
-        <div className="flex items-center space-x-2 mb-2">
-          <Brain className="w-4 h-4 text-slate-600" />
-          <span className="text-sm font-semibold text-slate-700">
-            Clinical Validation
-          </span>
-        </div>
-        <p className="text-xs text-slate-600">
-          Performance metrics validated against PHQ-9 depression screening tool,
-          DSM-5 criteria, and clinical research standards. System maintains
-          healthcare-grade accuracy and reliability for mental health
-          assessment.
-        </p>
-      </motion.div>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+          className="mt-6 p-4 bg-gradient-to-r from-slate-50 to-slate-100/50 rounded-xl border border-slate-200/50"
+        >
+          <div className="flex items-center space-x-2 mb-2">
+            <Brain className="w-4 h-4 text-slate-600" />
+            <span className="text-sm font-semibold text-slate-700">
+              Clinical Validation
+            </span>
+          </div>
+          <p className="text-xs text-slate-600">
+            Performance metrics validated against PHQ-9 depression screening
+            tool, DSM-5 criteria, and clinical research standards. System
+            maintains healthcare-grade accuracy and reliability for mental
+            health assessment.
+          </p>
+        </motion.div>
+      </div>
     </motion.div>
   );
 };
