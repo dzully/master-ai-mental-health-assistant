@@ -109,13 +109,14 @@ const DepressionDetectionSystem = () => {
 
                   <div className="space-y-2">
                     <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-800 via-blue-700 to-purple-700 bg-clip-text text-transparent">
-                      AI Mental Health Assistant
+                      AI Mental Health Assistant Malaysia
                     </h1>
                     <p className="text-slate-600 font-medium text-lg flex items-center space-x-2">
                       <Shield className="w-5 h-5 text-blue-600" />
                       <span>
-                        Intelligent Conversational Agent for Depression
-                        Detection & Support
+                        Agen Perbualan Pintar untuk Pengesanan Kemurungan &
+                        Sokongan | Intelligent Conversational Agent for
+                        Depression Detection & Support
                       </span>
                     </p>
                   </div>

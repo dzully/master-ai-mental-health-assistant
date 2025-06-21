@@ -372,6 +372,7 @@ const THERAPEUTIC_INTERVENTIONS = {
 export class AIService {
   private model = google("models/gemini-2.0-flash-exp");
   private responseCount = 0;
+  private isInitialized = false;
 
   /**
    * Verifies the connection to the AI model by sending a test prompt.
@@ -490,10 +491,10 @@ export class AIService {
   ): string {
     this.responseCount++;
     const personalities = [
-      `You are Dr. Sarah, a warm and empathetic mental health professional who talks like a caring friend. You're knowledgeable but down-to-earth, using casual language while offering expert insights.`,
-      `You are Alex, a friendly counselor who combines professional expertise with a relaxed, approachable style. You talk like someone who genuinely cares and has been through life's ups and downs.`,
-      `You are Jamie, a supportive mental health expert who feels like a wise friend. You're understanding, use everyday language, and always have practical advice that actually helps.`,
-      `You are Taylor, a compassionate therapist who believes in people's strength. You talk casually but with deep insight, like a friend who happens to be really good at helping people figure things out.`,
+      `You are Dr. Siti, a warm and empathetic Malaysian mental health professional who understands local culture and speaks like a caring friend. You're knowledgeable about both Western psychology and Asian cultural values, using accessible language while offering culturally-sensitive insights.`,
+      `You are Ahmad, a friendly Malaysian counselor who combines professional expertise with a relaxed, approachable style. You understand the multicultural Malaysian context and talk like someone who genuinely cares about respecting cultural diversity and family values.`,
+      `You are Li Wei, a supportive Malaysian mental health expert who feels like a wise friend from the community. You're understanding of cultural pressures, use everyday language, and always have practical advice that respects Malaysian values and customs.`,
+      `You are Priya, a compassionate Malaysian therapist who believes in people's strength while understanding the importance of family and community in Malaysian culture. You talk casually but with deep cultural insight, like a trusted friend who understands local challenges.`,
     ];
     const selectedPersonality =
       personalities[this.responseCount % personalities.length];
@@ -504,18 +505,20 @@ Context: ${context}
 Risk level detected: ${analysisResult.riskLevel}
 Recent conversation: ${conversationHistory.slice(-3).join(" | ")}
 
-Respond like a caring friend who happens to be a mental health expert. Your response should be:
-- 4-5 sentences in a warm, conversational tone like talking to a close friend.
-- Use casual, everyday language - avoid overly clinical or formal terms.
-- Acknowledge what they shared with genuine empathy and understanding.
-- FOCUS ON PROVIDING PRACTICAL SOLUTIONS, ADVICE, AND ACTIONABLE STEPS they can try. Give specific suggestions, techniques, or strategies that could help.
-- Only ask a question if you genuinely need more information to provide better help. Otherwise, give solutions and advice.
-- Sound like a real person who genuinely cares and has helpful ideas to share.
-- Use contractions (I'm, you're, that's, etc.) and speak naturally.
+Respond like a caring Malaysian friend who happens to be a mental health expert. Your response should be:
+- 4-5 sentences in a warm, conversational tone like talking to a close friend in the Malaysian context.
+- Use casual, everyday language that resonates with Malaysian culture - avoid overly clinical or formal terms.
+- Show understanding of Malaysian cultural values including family respect, community support, and cultural diversity.
+- Be sensitive to potential cultural stigma around mental health in Malaysian society.
+- FOCUS ON PROVIDING PRACTICAL SOLUTIONS, ADVICE, AND ACTIONABLE STEPS that work within Malaysian cultural context.
+- Consider family dynamics, work-life balance, and cultural expectations common in Malaysia.
+- Suggest culturally appropriate coping strategies that respect Malaysian values.
+- Only ask a question if you genuinely need more information to provide better help.
+- Sound like a real Malaysian who genuinely cares and understands local challenges.
 
 Generate the response in this EXACT JSON format (ensure all quotes are properly escaped):
 {
-  "content": "Your friendly, solution-focused response with practical advice and actionable suggestions.",
+  "content": "Your friendly, culturally-aware response with practical advice suited for Malaysian context.",
   "emotion": "warm|caring|understanding|supportive",
   "followUp": "Only include if you need specific information to help better (keep this empty most of the time).",
   "supportType": "practical-advice|actionable-solutions|coping-strategies|helpful-techniques"
@@ -592,24 +595,36 @@ Generate the response in this EXACT JSON format (ensure all quotes are properly 
       greeting: {
         low: {
           content:
-            "Hello! I'm really glad you're here. How are you feeling today?",
-          supportiveElements: ["warmth", "welcoming"],
+            "Selamat sejahtera! I'm really glad you're here today. Whether you prefer to chat in English or Bahasa Malaysia, this is your safe space. Apa khabar? How are you feeling?",
+          supportiveElements: ["warmth", "welcoming", "cultural_inclusivity"],
           recommendedActions: ["open_dialogue"],
-          followUpSuggestions: ["What's been on your mind lately?"],
+          followUpSuggestions: [
+            "What's been on your mind lately? Apa yang anda fikirkan?",
+          ],
         },
         medium: {
           content:
-            "Hi there. Thank you for reaching out. I'm here to listen - what would you like to talk about?",
-          supportiveElements: ["presence", "availability"],
+            "Hello there. Terima kasih for reaching out - I know discussing feelings can sometimes feel challenging in our Malaysian culture. I'm here to listen without judgment. What would you like to share?",
+          supportiveElements: [
+            "presence",
+            "cultural_sensitivity",
+            "availability",
+          ],
           recommendedActions: ["gentle_exploration"],
-          followUpSuggestions: ["How has your day been treating you?"],
+          followUpSuggestions: ["How has your day been? Bagaimana hari anda?"],
         },
         high: {
           content:
-            "Hello, I'm here for you. It takes courage to reach out, and I want you to know you're not alone.",
-          supportiveElements: ["validation", "courage_recognition"],
+            "Hello, I'm here for you. It takes real courage to reach out, especially when mental health topics can feel stigmatized in our society. You're not alone in this journey.",
+          supportiveElements: [
+            "validation",
+            "courage_recognition",
+            "anti_stigma",
+          ],
           recommendedActions: ["immediate_support"],
-          followUpSuggestions: ["What's feeling most difficult right now?"],
+          followUpSuggestions: [
+            "What's feeling most difficult right now? Apa yang paling susah untuk anda sekarang?",
+          ],
         },
       },
       sharing: {
@@ -688,29 +703,37 @@ Generate the response in this EXACT JSON format (ensure all quotes are properly 
       struggling: {
         low: {
           content:
-            "I hear you saying this is hard for you. Sometimes life can feel overwhelming, and that's completely understandable.",
-          supportiveElements: ["hearing", "normalization"],
+            "I hear you saying this is hard for you. Life pressures, whether from work, family expectations, or personal challenges, can feel overwhelming - and that's completely understandable in our fast-paced Malaysian society.",
+          supportiveElements: ["hearing", "normalization", "cultural_context"],
           recommendedActions: ["validate_struggle"],
           followUpSuggestions: [
-            "What's making it feel particularly difficult today?",
+            "What's making it feel particularly difficult today? Apa yang buat anda rasa susah?",
           ],
         },
         medium: {
           content:
-            "It takes courage to acknowledge when things are difficult. I want you to know that struggling doesn't define your worth.",
-          supportiveElements: ["courage", "worth_affirmation"],
+            "It takes courage to acknowledge when things are difficult, especially when there might be pressure to 'be strong' for family or cultural expectations. I want you to know that struggling doesn't define your worth.",
+          supportiveElements: [
+            "courage",
+            "worth_affirmation",
+            "cultural_pressure_awareness",
+          ],
           recommendedActions: ["separate_struggle_from_identity"],
           followUpSuggestions: [
-            "What's one small thing that might bring you a moment of peace?",
+            "What's one small thing that might bring you a moment of peace? Maybe something that connects you to your roots or culture?",
           ],
         },
         high: {
           content:
-            "I can hear how much pain you're in, and I want you to know that your feelings are completely valid. You don't have to carry this burden alone.",
-          supportiveElements: ["pain_recognition", "validation"],
+            "I can hear how much pain you're in, and I want you to know that your feelings are completely valid. Even if cultural or family expectations make it hard to express vulnerability, you don't have to carry this burden alone.",
+          supportiveElements: [
+            "pain_recognition",
+            "validation",
+            "cultural_validation",
+          ],
           recommendedActions: ["share_burden"],
           followUpSuggestions: [
-            "Is there anyone in your life who supports you?",
+            "Is there anyone in your life who supports you? Adakah ada orang yang boleh tolong anda?",
           ],
         },
       },
@@ -745,11 +768,11 @@ Generate the response in this EXACT JSON format (ensure all quotes are properly 
   private getContextualFallback(situation: FallbackSituation): string {
     const fallbacks = {
       parsing_failed:
-        "I want to make sure I understand you correctly. Can you tell me more about how you're feeling?",
+        "Maaf, saya nak pastikan saya faham betul. Can you tell me more about how you're feeling? You can share in English or Bahasa Malaysia - whatever feels more comfortable.",
       connection_error:
-        "I'm having some technical difficulties, but I'm still here for you. What's on your mind?",
+        "I'm having some technical difficulties, but I'm still here for you. Saya masih ada untuk anda. What's on your mind?",
       default:
-        "I'm here to listen and support you. How are you doing right now?",
+        "I'm here to listen and support you. Saya di sini untuk dengar dan sokong anda. How are you doing right now?",
     };
     return fallbacks[situation] || fallbacks.default;
   }
@@ -757,6 +780,9 @@ Generate the response in this EXACT JSON format (ensure all quotes are properly 
   // --- User Input Analysis Methods ---
 
   async analyzeUserInput(text: string): Promise<AnalysisResult> {
+    // Initialize ML clustering model if not already done
+    await this.ensureInitialized();
+
     const linguisticAnalysis = this.performLinguisticAnalysis(text);
     const keywordAnalysis = this.performKeywordAnalysis(text);
 
@@ -781,8 +807,37 @@ Generate the response in this EXACT JSON format (ensure all quotes are properly 
             clusterAssignment,
           );
 
+        // Get cluster-based risk level
+        const clusters = mlClusteringService.getCurrentClusters();
+        const assignedCluster = clusters[clusterAssignment.clusterId];
+        const clusterRiskLevel =
+          assignedCluster?.riskLevel || baseAnalysis.riskLevel;
+
+        // Use cluster risk level if confidence is high enough, otherwise blend with base analysis
+        const finalRiskLevel =
+          clusterAssignment.confidence > 0.7
+            ? clusterRiskLevel
+            : this.blendRiskLevels(baseAnalysis.riskLevel, clusterRiskLevel);
+
+        // Update sentiment based on risk level
+        const finalSentiment = this.getSentimentFromRiskLevel(
+          finalRiskLevel,
+          baseAnalysis.sentiment,
+        );
+
+        // Debug logging for ML clustering
+        console.log("🧠 ML Clustering Debug:", {
+          baseRisk: baseAnalysis.riskLevel,
+          clusterRisk: clusterRiskLevel,
+          clusterConfidence: clusterAssignment.confidence,
+          finalRisk: finalRiskLevel,
+          clusterId: clusterAssignment.clusterId,
+        });
+
         return {
           ...baseAnalysis,
+          riskLevel: finalRiskLevel,
+          sentiment: finalSentiment,
           clusterAssignment,
           phq9Estimation,
           therapeuticRecommendations,
@@ -1014,6 +1069,52 @@ Generate the response in this EXACT JSON format (ensure all quotes are properly 
     score += keywordAnalysis.depressionKeywords.length * 2.0; // Depression keywords weighted heavily
     score -= keywordAnalysis.positiveKeywords.length * 1.5; // Positive keywords protective
 
+    // Additional contextual scoring for specific phrases
+    const lowerText = text.toLowerCase();
+
+    // High-risk phrases (immediate elevation)
+    const highRiskPhrases = [
+      "feel like dying",
+      "want to die",
+      "end it all",
+      "can't go on",
+      "nothing matters",
+      "give up",
+      "hopeless",
+      "worthless",
+      "burden",
+      "tired of living",
+      "no point",
+      "can't cope",
+    ];
+
+    // Medium-risk phrases
+    const mediumRiskPhrases = [
+      "feeling down",
+      "very sad",
+      "can't sleep",
+      "no energy",
+      "anxious",
+      "overwhelmed",
+      "stressed out",
+      "difficult time",
+      "struggling",
+    ];
+
+    // Check for high-risk phrases
+    highRiskPhrases.forEach((phrase) => {
+      if (lowerText.includes(phrase)) {
+        score += 5; // Significant elevation
+      }
+    });
+
+    // Check for medium-risk phrases
+    mediumRiskPhrases.forEach((phrase) => {
+      if (lowerText.includes(phrase)) {
+        score += 1.5; // Moderate elevation
+      }
+    });
+
     // Risk assessment based on suicidal ideation
     if (keywordAnalysis.riskKeywords.length > 0) {
       score += 10; // Immediate elevation for suicidal content
@@ -1021,24 +1122,52 @@ Generate the response in this EXACT JSON format (ensure all quotes are properly 
       sentiment = "concerning";
     }
 
-    // Determine risk level based on combined factors
+    // Enhanced risk level determination with more sensitive thresholds
     if (riskLevel !== "high") {
-      if (phq9Score >= 15 || score >= 8) {
+      // Higher sensitivity for depression detection
+      if (
+        phq9Score >= 15 ||
+        score >= 7 ||
+        keywordAnalysis.depressionKeywords.length >= 4
+      ) {
         riskLevel = "high";
         sentiment = "concerning";
-      } else if (phq9Score >= 10 || score >= 4) {
+      } else if (
+        phq9Score >= 10 ||
+        score >= 3.5 ||
+        keywordAnalysis.depressionKeywords.length >= 2
+      ) {
         riskLevel = "medium";
         sentiment = "negative";
-      } else if (phq9Score >= 5 || score >= 2) {
+      } else if (
+        phq9Score >= 5 ||
+        score >= 1.5 ||
+        keywordAnalysis.depressionKeywords.length >= 1
+      ) {
         riskLevel = "low";
         sentiment =
-          keywordAnalysis.positiveKeywords.length > 0 ? "neutral" : "negative";
+          keywordAnalysis.positiveKeywords.length >
+          keywordAnalysis.depressionKeywords.length
+            ? "neutral"
+            : "negative";
       } else {
         riskLevel = "low";
         sentiment =
           keywordAnalysis.positiveKeywords.length > 0 ? "positive" : "neutral";
       }
     }
+
+    // Debug logging to understand what's happening
+    console.log("🔍 Risk Analysis Debug:", {
+      text: text.substring(0, 50) + "...",
+      phq9Score,
+      score,
+      depressionKeywords: keywordAnalysis.depressionKeywords,
+      positiveKeywords: keywordAnalysis.positiveKeywords,
+      riskKeywords: keywordAnalysis.riskKeywords,
+      finalRiskLevel: riskLevel,
+      finalSentiment: sentiment,
+    });
 
     // Calculate confidence based on available indicators
     const totalIndicators =
@@ -1102,5 +1231,55 @@ Generate the response in this EXACT JSON format (ensure all quotes are properly 
     if (somaticSymptoms.length >= 1) clusters.push("Somatic symptoms");
 
     return clusters;
+  }
+
+  private blendRiskLevels(
+    baseRisk: "low" | "medium" | "high",
+    clusterRisk: "low" | "medium" | "high",
+  ): "low" | "medium" | "high" {
+    const riskScores = { low: 1, medium: 2, high: 3 };
+    const baseScore = riskScores[baseRisk];
+    const clusterScore = riskScores[clusterRisk];
+
+    // Weighted average (70% cluster, 30% base analysis)
+    const blendedScore = clusterScore * 0.7 + baseScore * 0.3;
+
+    if (blendedScore >= 2.5) return "high";
+    if (blendedScore >= 1.5) return "medium";
+    return "low";
+  }
+
+  private getSentimentFromRiskLevel(
+    riskLevel: "low" | "medium" | "high",
+    baseSentiment: "positive" | "neutral" | "concerning" | "negative",
+  ): "positive" | "neutral" | "concerning" | "negative" {
+    // Risk level should influence sentiment
+    switch (riskLevel) {
+      case "high":
+        return "concerning";
+      case "medium":
+        return baseSentiment === "positive" ? "neutral" : "negative";
+      case "low":
+        return baseSentiment;
+      default:
+        return baseSentiment;
+    }
+  }
+
+  /**
+   * Ensures the ML clustering model is initialized with sample data
+   */
+  private async ensureInitialized(): Promise<void> {
+    if (this.isInitialized) {
+      return;
+    }
+
+    try {
+      await mlClusteringService.initializeWithSampleData();
+      this.isInitialized = true;
+    } catch (error) {
+      console.error("Failed to initialize ML clustering:", error);
+      // Continue without clustering
+    }
   }
 }

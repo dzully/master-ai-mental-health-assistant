@@ -21,42 +21,45 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
   userProfile,
   getRiskLevelColor,
 }) => {
-  // Clinical interpretation of risk levels based on validated assessment tools
+  // Clinical interpretation of risk levels based on validated assessment tools with Malaysian context
   const getRiskLevelInfo = (riskLevel: string) => {
     switch (riskLevel) {
       case "high":
         return {
-          description: "Immediate professional intervention recommended",
+          description:
+            "Intervensi profesional segera disyorkan | Immediate professional intervention recommended",
           clinicalNote:
-            "Indicators suggest significant depression symptoms requiring immediate attention",
+            "Petunjuk menunjukkan simptom kemurungan yang signifikan memerlukan perhatian segera | Indicators suggest significant depression symptoms requiring immediate attention",
           interventions: [
-            "Crisis hotline",
-            "Emergency services",
-            "Professional referral",
+            "Talian krisis (Befrienders: 03-7627 2929)",
+            "Perkhidmatan kecemasan (999)",
+            "Rujukan profesional tempatan",
           ],
           icon: AlertTriangle,
         };
       case "medium":
         return {
-          description: "Professional mental health consultation advised",
+          description:
+            "Perundingan kesihatan mental profesional disarankan | Professional mental health consultation advised",
           clinicalNote:
-            "Moderate depression indicators detected, therapeutic support beneficial",
+            "Petunjuk kemurungan sederhana dikesan, sokongan terapeutik bermanfaat | Moderate depression indicators detected, therapeutic support beneficial",
           interventions: [
-            "Therapy referral",
-            "CBT techniques",
-            "Mood monitoring",
+            "Rujukan terapi Malaysia",
+            "Teknik CBT yang sesuai budaya",
+            "Pemantauan mood dengan keluarga",
           ],
           icon: Brain,
         };
       default:
         return {
-          description: "Minimal depression indicators, continue monitoring",
+          description:
+            "Petunjuk kemurungan minimum, teruskan pemantauan | Minimal depression indicators, continue monitoring",
           clinicalNote:
-            "Low-risk profile with supportive intervention appropriate",
+            "Profil risiko rendah dengan intervensi sokongan yang sesuai | Low-risk profile with supportive intervention appropriate",
           interventions: [
-            "Self-care strategies",
-            "Preventive resources",
-            "Peer support",
+            "Strategi penjagaan diri",
+            "Sumber pencegahan tempatan",
+            "Sokongan komuniti Malaysia",
           ],
           icon: User,
         };
@@ -144,9 +147,11 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
         </motion.div>
         <div>
           <h3 className="text-xl font-bold text-slate-800">
-            Clinical Assessment
+            Penilaian Klinikal | Clinical Assessment
           </h3>
-          <p className="text-sm text-slate-600">User Mental Health Profile</p>
+          <p className="text-sm text-slate-600">
+            Profil Kesihatan Mental Pengguna | User Mental Health Profile
+          </p>
         </div>
       </div>
 
@@ -324,8 +329,9 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
         transition={{ delay: 0.9 }}
         className="text-xs text-center text-slate-500 pt-4 border-t border-slate-200/50"
       >
-        Last interaction: {userProfile.lastInteraction.toLocaleDateString()} at{" "}
-        {userProfile.lastInteraction.toLocaleTimeString([], {
+        Last interaction: {userProfile?.lastInteraction?.toLocaleDateString()}{" "}
+        at{" "}
+        {userProfile?.lastInteraction?.toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
         })}

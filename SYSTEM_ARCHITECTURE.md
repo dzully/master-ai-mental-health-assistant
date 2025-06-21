@@ -1,8 +1,8 @@
-# AI Mental Health Assistant - System Architecture
+# AI Mental Health Assistant - System Architecture (Malaysia Focus)
 
 ## Research-Based Implementation Overview
 
-This document outlines how the AI Mental Health Assistant system fulfills the requirements for intelligent depression detection based on clinical research and validated methodologies.
+This document outlines how the AI Mental Health Assistant system fulfills the requirements for intelligent depression detection in the Malaysian context, based on clinical research and culturally-adapted validated methodologies.
 
 ## 🔬 Research Requirements Fulfillment
 

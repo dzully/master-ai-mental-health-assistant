@@ -38,13 +38,13 @@ const createInitialUserProfile = (date: Date): UserProfile => ({
   protectiveFactors: [], // Identified protective factors
 });
 
-// Clinical-grade initial bot message based on validated therapeutic communication
+// Clinical-grade initial bot message based on validated therapeutic communication with Malaysian context
 const createInitialMessages = (date: Date): Message[] => [
   {
     id: 1,
     type: "bot",
     content:
-      "Hello! I'm here to provide a supportive space for you to share how you're feeling. This conversation is confidential and I'm designed to help identify when someone might benefit from additional mental health support. How have you been feeling lately?",
+      "Selamat sejahtera! I'm here to provide a supportive space for you to share how you're feeling. Perbualan ini sulit dan saya direka untuk membantu mengenal pasti apabila seseorang mungkin mendapat manfaat daripada sokongan kesihatan mental tambahan. This conversation is confidential and culturally-sensitive. You can share in English or Bahasa Malaysia - whatever feels comfortable. Bagaimana perasaan anda lately?",
     timestamp: date,
     sentiment: "neutral",
     confidence: 0.85,
@@ -214,7 +214,7 @@ export const useDepressionDetection = () => {
             id: messages.length + 2,
             type: "bot",
             content:
-              "I'm here to listen and support you. Could you tell me more about how you're feeling?",
+              "I'm here to listen and support you. Saya di sini untuk mendengar dan menyokong anda. Could you tell me more about how you're feeling? Boleh beritahu saya lebih lanjut tentang perasaan anda?",
             timestamp: createNewDate(),
             sentiment: "neutral",
             confidence: 0.7,

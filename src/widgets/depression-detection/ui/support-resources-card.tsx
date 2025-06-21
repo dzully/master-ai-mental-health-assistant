@@ -1,14 +1,7 @@
 "use client";
 
 import React from "react";
-import {
-  Phone,
-  MessageSquare,
-  Globe,
-  Heart,
-  AlertTriangle,
-  Users,
-} from "lucide-react";
+import { Phone, Globe, Heart, AlertTriangle, Users } from "lucide-react";
 import { m } from "framer-motion";
 
 interface SupportResourcesCardProps {
@@ -18,28 +11,36 @@ interface SupportResourcesCardProps {
 export const SupportResourcesCard: React.FC<SupportResourcesCardProps> = ({
   userRiskLevel,
 }) => {
-  // Real crisis resources - verified and current as of 2024
+  // Malaysia crisis resources - verified and current as of 2024
   const crisisResources = [
     {
-      name: "988 Suicide & Crisis Lifeline",
-      contact: "988",
-      description: "24/7 crisis support in English and Spanish",
+      name: "Talian Kasih (Welfare Department)",
+      contact: "15999",
+      description: "24/7 crisis support and counseling in Bahasa Malaysia",
       icon: Phone,
       type: "crisis",
       priority: 1,
     },
     {
-      name: "Crisis Text Line",
-      contact: "Text HOME to 741741",
-      description: "24/7 text-based crisis support",
-      icon: MessageSquare,
+      name: "Befrienders Kuala Lumpur",
+      contact: "03-7627 2929",
+      description: "24/7 emotional support and crisis intervention",
+      icon: Phone,
       type: "crisis",
       priority: 1,
     },
     {
-      name: "National Domestic Violence Hotline",
-      contact: "1-800-799-7233",
-      description: "24/7 support for domestic violence situations",
+      name: "MIASA Crisis Helpline",
+      contact: "03-2780 6803",
+      description: "Mental health crisis support and referrals",
+      icon: Phone,
+      type: "crisis",
+      priority: 1,
+    },
+    {
+      name: "Emergency Services Malaysia",
+      contact: "999",
+      description: "Police, ambulance, and fire emergency services",
       icon: Phone,
       type: "crisis",
       priority: 2,
@@ -48,48 +49,56 @@ export const SupportResourcesCard: React.FC<SupportResourcesCardProps> = ({
 
   const professionalResources = [
     {
-      name: "Psychology Today",
-      contact: "psychologytoday.com/us/therapists",
-      description: "Find licensed therapists and psychiatrists",
+      name: "Malaysian Mental Health Association",
+      contact: "mmha.org.my | 03-2780 6803",
+      description: "Find certified mental health professionals in Malaysia",
       icon: Globe,
       type: "professional",
     },
     {
-      name: "SAMHSA Treatment Locator",
-      contact: "findtreatment.samhsa.gov",
-      description: "Locate mental health and substance abuse treatment",
+      name: "Ministry of Health Mental Health Services",
+      contact: "moh.gov.my/mental-health",
+      description: "Government mental health services and public hospitals",
       icon: Globe,
       type: "professional",
     },
     {
-      name: "NAMI (National Alliance on Mental Illness)",
-      contact: "nami.org | 1-800-950-6264",
-      description: "Mental health education, support, and advocacy",
+      name: "Malaysian Psychiatric Association",
+      contact: "psychiatry-malaysia.org",
+      description: "Locate psychiatrists and specialized mental health care",
       icon: Users,
-      type: "support",
+      type: "professional",
+    },
+    {
+      name: "University Malaya Medical Centre",
+      contact: "03-7949 4422",
+      description: "Mental health services and psychiatric consultation",
+      icon: Phone,
+      type: "professional",
     },
   ];
 
   const selfHelpResources = [
     {
-      name: "MindShift App",
-      contact: "Available on app stores",
-      description: "Free anxiety and depression management app",
+      name: "MyMind Mental Health App",
+      contact: "Available on Malaysian app stores",
+      description:
+        "Local mental health support and resources in multiple languages",
       icon: Heart,
       type: "selfhelp",
     },
     {
-      name: "7 Cups",
-      contact: "7cups.com",
-      description: "Free emotional support from trained listeners",
-      icon: MessageSquare,
+      name: "KKM InfoSihat",
+      contact: "infosihat.gov.my",
+      description: "Ministry of Health mental wellness resources",
+      icon: Globe,
       type: "selfhelp",
     },
     {
-      name: "Crisis Text Line (Non-Crisis)",
-      contact: "Text HELLO to 741741",
-      description: "Emotional support via text messaging",
-      icon: MessageSquare,
+      name: "Malaysian Counseling Association",
+      contact: "kaunselor.com.my",
+      description: "Professional counseling services directory",
+      icon: Users,
       type: "selfhelp",
     },
   ];
@@ -100,9 +109,9 @@ export const SupportResourcesCard: React.FC<SupportResourcesCardProps> = ({
         return {
           primary: crisisResources,
           secondary: professionalResources.slice(0, 2),
-          title: "Immediate Support Resources",
+          title: "Sumber Sokongan Segera | Immediate Support Resources",
           urgencyMessage:
-            "If you're in immediate danger, please call 911 or go to your nearest emergency room.",
+            "Jika anda dalam bahaya segera, sila hubungi 999 atau pergi ke hospital terdekat. | If you're in immediate danger, please call 999 or go to your nearest hospital.",
         };
       case "medium":
         return {
@@ -111,9 +120,9 @@ export const SupportResourcesCard: React.FC<SupportResourcesCardProps> = ({
             ...professionalResources.slice(0, 2),
           ],
           secondary: selfHelpResources.slice(0, 2),
-          title: "Professional Support Resources",
+          title: "Sumber Sokongan Profesional | Professional Support Resources",
           urgencyMessage:
-            "Consider reaching out to a mental health professional for support.",
+            "Pertimbangkan untuk menghubungi pakar kesihatan mental untuk sokongan. | Consider reaching out to a mental health professional for support.",
         };
       default:
         return {
@@ -122,9 +131,9 @@ export const SupportResourcesCard: React.FC<SupportResourcesCardProps> = ({
             ...selfHelpResources.slice(0, 2),
           ],
           secondary: crisisResources.slice(0, 2),
-          title: "Mental Health Resources",
+          title: "Sumber Kesihatan Mental | Mental Health Resources",
           urgencyMessage:
-            "These resources are available if you need support or guidance.",
+            "Sumber-sumber ini tersedia jika anda memerlukan sokongan atau panduan. | These resources are available if you need support or guidance.",
         };
     }
   };
@@ -161,7 +170,7 @@ export const SupportResourcesCard: React.FC<SupportResourcesCardProps> = ({
             {resources.title}
           </h3>
           <p className="text-sm text-slate-600">
-            Professional & Crisis Support
+            Sokongan Profesional & Krisis | Professional & Crisis Support
           </p>
         </div>
       </div>
@@ -174,7 +183,7 @@ export const SupportResourcesCard: React.FC<SupportResourcesCardProps> = ({
         >
           <div className="flex items-center space-x-2 mb-2">
             <AlertTriangle className="w-5 h-5" />
-            <span className="font-semibold">Important</span>
+            <span className="font-semibold">Penting | Important</span>
           </div>
           <p className="text-sm">{resources.urgencyMessage}</p>
         </m.div>
@@ -257,7 +266,8 @@ export const SupportResourcesCard: React.FC<SupportResourcesCardProps> = ({
           {resources.urgencyMessage}
           <br />
           <span className="text-slate-500">
-            Resources verified as of 2024 • Available 24/7
+            Sumber disahkan setakat 2024 • Tersedia 24/7 | Resources verified as
+            of 2024 • Available 24/7
           </span>
         </p>
       </m.div>

@@ -261,17 +261,18 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 This system is designed for research and educational purposes. It is not intended to replace professional mental health care. Users experiencing mental health crises should contact emergency services or mental health professionals immediately.
 
-**Emergency Resources:**
+**Emergency Resources (Malaysia):**
 
-- National Suicide Prevention Lifeline: 988
-- Crisis Text Line: Text HOME to 741741
-- Emergency Services: 911
+- Talian Kasih (Welfare Department): 15999
+- Befrienders Kuala Lumpur: 03-7627 2929
+- MIASA Crisis Helpline: 03-2780 6803
+- Emergency Services Malaysia: 999
 
 ## 👨‍🔬 Research Team
 
 **Principal Investigator:** Mohamad Dzul Syakimin  
 **Institution:** University of Malaya  
-**Research Focus:** Intelligent Conversational Agents for Mental Health
+**Research Focus:** Intelligent Conversational Agents for Mental Health in Malaysian Context
 
 ---
 
