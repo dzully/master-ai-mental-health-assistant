@@ -197,6 +197,14 @@ const DepressionDetectionSystem = () => {
                   getRiskLevelColor={getRiskLevelColor}
                 />
               )}
+
+              <SystemMetricsCard metrics={systemMetrics} />
+
+              {currentSession && (
+                <SupportResourcesCard
+                  userRiskLevel={currentSession.userProfile.riskLevel}
+                />
+              )}
             </motion.div>
           </div>
 
@@ -207,10 +215,14 @@ const DepressionDetectionSystem = () => {
             className="flex flex-col lg:flex-row mt-6 gap-6"
           >
             <div className="flex-1">
-              <SystemMetricsCard systemMetrics={systemMetrics} />
+              <SystemMetricsCard metrics={systemMetrics} />
             </div>
             <div className="flex-1">
-              <SupportResourcesCard />
+              {currentSession && (
+                <SupportResourcesCard
+                  userRiskLevel={currentSession.userProfile.riskLevel}
+                />
+              )}
             </div>
           </motion.div>
 

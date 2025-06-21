@@ -117,33 +117,171 @@ class ChatSessionService {
   }
 
   private extractKeyTopics(userMessages: Message[]): string[] {
-    const keywords = [
-      "stress",
-      "anxiety",
-      "depression",
-      "sad",
-      "happy",
-      "worry",
-      "fear",
-      "lonely",
-      "tired",
-      "sleep",
-      "work",
-      "family",
-      "relationship",
-    ];
-    const foundTopics = new Set<string>();
+    // Clinical topic categories based on validated mental health assessments
+    // These align with DSM-5 criteria and common therapeutic themes
+    const clinicalTopics = {
+      // Mood and emotional state
+      mood: [
+        "mood",
+        "feeling",
+        "emotion",
+        "sad",
+        "happy",
+        "angry",
+        "frustrated",
+        "upset",
+        "down",
+        "blue",
+      ],
 
-    userMessages.forEach((msg) => {
-      const content = msg.content.toLowerCase();
-      keywords.forEach((keyword) => {
-        if (content.includes(keyword)) {
-          foundTopics.add(keyword);
-        }
-      });
+      // Anxiety and stress
+      anxiety: [
+        "anxiety",
+        "anxious",
+        "worried",
+        "stress",
+        "stressed",
+        "panic",
+        "nervous",
+        "tense",
+        "overwhelmed",
+      ],
+
+      // Sleep and energy
+      sleep: [
+        "sleep",
+        "tired",
+        "exhausted",
+        "insomnia",
+        "fatigue",
+        "energy",
+        "rest",
+        "wake",
+        "sleeping",
+      ],
+
+      // Relationships and social
+      relationships: [
+        "family",
+        "friends",
+        "relationship",
+        "partner",
+        "spouse",
+        "children",
+        "parents",
+        "social",
+        "alone",
+        "lonely",
+        "isolated",
+      ],
+
+      // Work and achievement
+      work: [
+        "work",
+        "job",
+        "career",
+        "school",
+        "performance",
+        "achievement",
+        "success",
+        "failure",
+        "productivity",
+      ],
+
+      // Physical health
+      health: [
+        "health",
+        "pain",
+        "sick",
+        "illness",
+        "medication",
+        "doctor",
+        "physical",
+        "body",
+        "symptoms",
+      ],
+
+      // Coping and behavior
+      coping: [
+        "coping",
+        "managing",
+        "dealing",
+        "handling",
+        "struggle",
+        "difficulty",
+        "challenge",
+        "problem",
+      ],
+
+      // Self-worth and identity
+      identity: [
+        "self",
+        "identity",
+        "worth",
+        "value",
+        "confidence",
+        "self-esteem",
+        "purpose",
+        "meaning",
+      ],
+
+      // Crisis indicators
+      crisis: [
+        "suicide",
+        "death",
+        "dying",
+        "hurt",
+        "harm",
+        "end",
+        "give up",
+        "hopeless",
+        "trapped",
+      ],
+
+      // Substance use
+      substance: [
+        "alcohol",
+        "drinking",
+        "drugs",
+        "substance",
+        "medication",
+        "pills",
+        "smoking",
+      ],
+    };
+
+    const foundTopics = new Set<string>();
+    const allText = userMessages
+      .map((msg) => msg.content.toLowerCase())
+      .join(" ");
+
+    // Analyze message content for clinical topics
+    Object.entries(clinicalTopics).forEach(([category, keywords]) => {
+      const matchCount = keywords.filter((keyword) =>
+        allText.includes(keyword.toLowerCase()),
+      ).length;
+
+      // Add topic if multiple keywords match (indicates genuine topic discussion)
+      if (matchCount >= 2 || (category === "crisis" && matchCount >= 1)) {
+        foundTopics.add(category);
+      }
     });
 
-    return Array.from(foundTopics).slice(0, 5);
+    // Add specific high-frequency keywords as topics
+    const specificKeywords = [
+      "depression",
+      "therapy",
+      "counseling",
+      "treatment",
+      "support",
+    ];
+    specificKeywords.forEach((keyword) => {
+      if (allText.includes(keyword)) {
+        foundTopics.add(keyword);
+      }
+    });
+
+    return Array.from(foundTopics).slice(0, 6); // Limit to most relevant topics
   }
 
   public createSession(userProfile: UserProfile): ChatSession {
